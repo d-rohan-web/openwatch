@@ -45,9 +45,9 @@ export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setTh
         <i className="dot" style={{ background: bad ? STATE.DEGRADED.color : STATE.OK.color }} />
         <span className="num">{ok}/{running.length}</span><span>feeds</span>
       </button>
-      <a className="icon-btn gh" href="https://github.com/d-rohan-web/openwatch" target="_blank" rel="noreferrer"
-        title="OpenWatch on GitHub: source, issues, contribute" aria-label="OpenWatch on GitHub">
-        <Github size={17} />
+      <a className="gh" href="https://github.com/d-rohan-web/openwatch/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer"
+        title="OpenWatch is open source: add a data source, fix a bug, improve the map">
+        <Github size={15} /><span>Contribute</span>
       </a>
       <div className="clock" aria-label="Time">
         <b className="num">{new Date(now).toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata" })}</b>
