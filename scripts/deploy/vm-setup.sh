@@ -25,8 +25,10 @@ set_env OPENWATCH_HTTP_PORT 80
 
 docker compose pull
 docker compose up -d --no-build --remove-orphans
+# Caddy reads its config at start: reload gracefully so Caddyfile changes from git apply without downtime
+docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile || true
 
 # daily update at 04:00 IST (22:30 UTC): newest main images, prune old ones
 cat > /etc/cron.d/openwatch-update <<CRON
-30 22 * * * root cd $DIR && git pull --ff-only -q && docker compose pull -q && docker compose up -d --no-build --remove-orphans && docker image prune -f >/dev/null
+30 22 * * * root cd $DIR && git pull --ff-only -q && docker compose pull -q && docker compose up -d --no-build --remove-orphans && docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile; docker image prune -f >/dev/null
 CRON
