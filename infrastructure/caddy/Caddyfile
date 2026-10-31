@@ -4,6 +4,12 @@
 	# compresses JSON and the SSE live stream too (keeps a small server inside its free egress)
 	encode zstd gzip
 
+	# access log (JSON, container stdout, rotated by Docker at 5 × 20 MB): visitor stats via scripts/deploy/stats.sh
+	log {
+		output stdout
+		format json
+	}
+
 	# optional extras such as basic auth: drop a file matching this glob into the container (see docs/deploy.md)
 	import /etc/caddy/extra*.caddy
 

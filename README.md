@@ -134,6 +134,12 @@ host with gaps between them, backs off when a source fails, and never works arou
 or blocks. A source that blocks it is left out. Sources that publish nothing machine-readable, or label their
 material "not for public use", are not ingested.
 
+## Privacy
+
+The app sets no cookies and uses no third-party analytics or trackers. The server keeps a standard web access log
+(time, page, browser, referrer, IP address) in a rotating Docker log of about 100 MB for operations and visitor
+counts; IPs are anonymised in the stats report. Map tiles load from OpenFreeMap, which sees your IP like any website.
+
 ## Contributing
 
 Contributions are welcome, especially new public Indian data sources. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
