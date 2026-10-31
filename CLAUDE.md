@@ -8,6 +8,7 @@ Read `README.md` and `docs/architecture.md` first.
 
 ```bash
 docker compose up -d --build                       # full stack → https://localhost:39443
+PROJECT=<id> bash scripts/deploy/gcp.sh            # deploy to Google Cloud e2-micro (see docs/deploy.md)
 docker compose --profile monitoring up -d          # + grafana on :39300
 docker compose logs -f collector                   # JSON logs
 uv run pytest -q                                   # Python tests (archive, geo, one per feed)

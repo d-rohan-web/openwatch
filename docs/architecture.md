@@ -4,22 +4,21 @@
 
 | Service | Role | Port |
 |---|---|---|
-| `nginx` | TLS, routes `/api` → api (SSE unbuffered, long export timeout), `/` → frontend, optional basic auth | 39443 / 39080 |
-| `certs-init` | one-shot self-signed certificate into the `certs` volume | — |
+| `caddy` | automatic HTTPS (Let's Encrypt for a public name, internal CA on localhost), zstd/gzip, routes `/api` → api (SSE flushed immediately), `/` → frontend | 39443 / 39080 (443/80 on a server) |
 | `frontend` | built React + MapLibre SPA, static | — |
 | `api` | FastAPI: live state, SSE stream, history, records, export, raw bytes, TomTom tile proxy, `/metrics` | — |
 | `collector` | runs every feed; writes the archive; publishes live state + health to Redis; `/metrics` on 9101 | — |
 | `redis` | live state and pub/sub only (no persistence: the archive is the record) | — |
 | `prometheus`, `loki`, `alloy`, `grafana` | `monitoring` profile: metrics, JSON logs, feed dashboard | 39300 (grafana) |
 
-Volumes: `archive` (the dataset; the collector writes it, the api mounts it read-only), `certs`, plus one each for
+Volumes: `archive` (the dataset; the collector writes it, the api mounts it read-only), `caddy_data` (certificates), plus one each for
 the monitoring stores.
 
 ```
  sources ──HTTP/WS──▶ collector ──append──▶ archive volume (JSONL → hourly Parquet, raw/*.gz)
                          │                         ▲
                          └─SET/PUBLISH─▶ redis ─SUB─┤
-                                                   api ◀── nginx ◀── browser (SSE + REST)
+                                                   api ◀── caddy ◀── browser (SSE + REST)
 ```
 
 ## 2. The record

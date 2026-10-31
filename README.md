@@ -39,6 +39,9 @@ open http://localhost:39300     # admin / GRAFANA_ADMIN_PASSWORD
 
 Global coverage is upcoming (experimental: `OPENWATCH_SCOPE=global`).
 
+**Deploy** to a free Google Cloud e2-micro VM with automatic HTTPS from Cloud Shell in one command: see
+[docs/deploy.md](docs/deploy.md).
+
 ## What's on the map
 
 | Group | Feeds and overlays |
@@ -98,8 +101,8 @@ apps/
 packages/
   common/           archive (Parquet/DuckDB), JSON logging, config, geo helpers + data
   contracts/        the one flat record shape
-infrastructure/     nginx (TLS, SSE), certs-init, monitoring (prometheus, loki, alloy, grafana)
-scripts/            try_feed.py (run one feed once), build_geo.py (boundary/district files)
+infrastructure/     caddy (automatic HTTPS, compression, SSE), monitoring (prometheus, loki, alloy, grafana)
+scripts/            try_feed.py (run one feed once), build_*.py (geo files), deploy/ (Google Cloud), ci/, github/
 tests/              archive, geo, one fixture test per feed
 docs/               architecture, data sources, design spec
 ```

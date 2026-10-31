@@ -1,0 +1,29 @@
+# Caddy: TLS (automatic Let's Encrypt for a public name, internal CA for localhost), compression, routing.
+# OPENWATCH_SITE = the site address, e.g. 34-10-20-30.sslip.io or openwatch.example.org (default: localhost)
+{$OPENWATCH_SITE:localhost} {
+	# compresses JSON and the SSE live stream too (keeps a small server inside its free egress)
+	encode zstd gzip
+
+	# optional extras such as basic auth: drop a file matching this glob into the container (see docs/deploy.md)
+	import /etc/caddy/extra*.caddy
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy same-origin
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Prometheus scrapes services directly on the compose network
+	respond /metrics 404
+
+	handle /api/* {
+		reverse_proxy api:8000 {
+			# SSE: deliver each event as it's written
+			flush_interval -1
+		}
+	}
+	handle {
+		reverse_proxy frontend:80
+	}
+}
