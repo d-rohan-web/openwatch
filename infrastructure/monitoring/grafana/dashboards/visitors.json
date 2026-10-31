@@ -1,0 +1,979 @@
+{
+ "uid": "openwatch-visitors",
+ "title": "OpenWatch · Visitors & traffic",
+ "description": "Who visits, from where (DB-IP Lite, CC BY 4.0), with what, and what it costs in bandwidth. IPv4 addresses are truncated to /24 before leaving the server, so 'unique visitors' is approximate.",
+ "tags": [
+  "openwatch"
+ ],
+ "schemaVersion": 39,
+ "time": {
+  "from": "now-24h",
+  "to": "now"
+ },
+ "refresh": "1m",
+ "timezone": "browser",
+ "templating": {
+  "list": [
+   {
+    "name": "prom",
+    "label": "Metrics",
+    "type": "datasource",
+    "query": "prometheus",
+    "hide": 0
+   },
+   {
+    "name": "loki",
+    "label": "Logs",
+    "type": "datasource",
+    "query": "loki",
+    "hide": 0
+   },
+   {
+    "name": "instance",
+    "label": "Site",
+    "type": "query",
+    "datasource": {
+     "type": "prometheus",
+     "uid": "${prom}"
+    },
+    "refresh": 2,
+    "includeAll": true,
+    "allValue": ".*",
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "query": {
+     "query": "label_values(openwatch_live_records, instance)",
+     "refId": "v"
+    },
+    "definition": "label_values(openwatch_live_records, instance)"
+   }
+  ]
+ },
+ "panels": [
+  {
+   "type": "stat",
+   "title": "Unique visitors · 24 h",
+   "description": "",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "count(sum by (ip) (count_over_time({job=\"access\", instance=~\"$instance\"} | json ip=\"request.remote_ip\" [24h])))",
+     "legendFormat": "",
+     "refId": "A",
+     "queryType": "instant"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "decimals": 0,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#ff9933",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 1,
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Page views · 24 h",
+   "description": "",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum(count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [24h]))",
+     "legendFormat": "",
+     "refId": "A",
+     "queryType": "instant"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "decimals": 0,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#7fd3ff",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 2,
+   "gridPos": {
+    "x": 6,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Data served · 24 h",
+   "description": "",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum(sum_over_time({job=\"access\", instance=~\"$instance\"} | json size=\"size\" | unwrap size [24h]))",
+     "legendFormat": "",
+     "refId": "A",
+     "queryType": "instant"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "decbytes",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#38bdf8",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 3,
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Projected egress / month",
+   "description": "Last 24 h × 30. Google Cloud's free egress is 1 GB/month; above that ≈ $0.12/GB",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum(sum_over_time({job=\"access\", instance=~\"$instance\"} | json size=\"size\" | unwrap size [24h])) * 30",
+     "legendFormat": "",
+     "refId": "A",
+     "queryType": "instant"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "decbytes",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#22d3a6",
+        "value": null
+       },
+       {
+        "color": "#ffd23f",
+        "value": 800000000.0
+       },
+       {
+        "color": "#ff4d4f",
+        "value": 1000000000.0
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 4,
+   "gridPos": {
+    "x": 18,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Unique visitors / hour",
+   "description": "",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "count(sum by (ip) (count_over_time({job=\"access\", instance=~\"$instance\"} | json ip=\"request.remote_ip\" [1h])))",
+     "legendFormat": "visitors",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "bars",
+      "lineWidth": 2,
+      "fillOpacity": 8,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 5,
+   "gridPos": {
+    "x": 0,
+    "y": 4,
+    "w": 16,
+    "h": 8
+   }
+  },
+  {
+   "type": "bargauge",
+   "title": "Top referrers",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "topk(10, sum by (referer) (count_over_time({job=\"access\", instance=~\"$instance\"} | json referer=\"request.headers.Referer[0]\" | referer != \"\" [$__range])))",
+     "legendFormat": "{{referer}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "orientation": "horizontal",
+    "displayMode": "gradient",
+    "showUnfilled": true,
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "values": false
+    },
+    "valueMode": "text"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "continuous-BlYlRd"
+     },
+     "displayName": "${__field.labels.referer}"
+    },
+    "overrides": []
+   },
+   "id": 6,
+   "gridPos": {
+    "x": 16,
+    "y": 4,
+    "w": 8,
+    "h": 8
+   }
+  },
+  {
+   "type": "bargauge",
+   "title": "Top pages",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "topk(10, sum by (uri) (count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range])))",
+     "legendFormat": "{{uri}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "orientation": "horizontal",
+    "displayMode": "gradient",
+    "showUnfilled": true,
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "values": false
+    },
+    "valueMode": "text"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "continuous-BlYlRd"
+     },
+     "displayName": "${__field.labels.uri}"
+    },
+    "overrides": []
+   },
+   "id": 7,
+   "gridPos": {
+    "x": 0,
+    "y": 12,
+    "w": 8,
+    "h": 9
+   }
+  },
+  {
+   "type": "geomap",
+   "title": "Where visitors come from",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum by (lat, lon, city, country) (count_over_time({job=\"access\", instance=~\"$instance\"} | lat != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range]))",
+     "legendFormat": "",
+     "refId": "A",
+     "queryType": "instant"
+    }
+   ],
+   "transformations": [
+    {
+     "id": "labelsToFields",
+     "options": {
+      "mode": "columns"
+     }
+    },
+    {
+     "id": "convertFieldType",
+     "options": {
+      "conversions": [
+       {
+        "targetField": "lat",
+        "destinationType": "number"
+       },
+       {
+        "targetField": "lon",
+        "destinationType": "number"
+       }
+      ]
+     }
+    }
+   ],
+   "options": {
+    "view": {
+     "id": "coords",
+     "lat": 22,
+     "lon": 79,
+     "zoom": 2
+    },
+    "basemap": {
+     "type": "osm-standard",
+     "name": "OpenStreetMap"
+    },
+    "controls": {
+     "showZoom": true,
+     "mouseWheelZoom": true
+    },
+    "layers": [
+     {
+      "type": "markers",
+      "name": "visitors",
+      "location": {
+       "mode": "coords",
+       "latitude": "lat",
+       "longitude": "lon"
+      },
+      "config": {
+       "size": {
+        "field": "Value",
+        "min": 4,
+        "max": 22,
+        "fixed": 6
+       },
+       "color": {
+        "fixed": "#ff9933"
+       },
+       "fillOpacity": 0.55,
+       "style": {
+        "symbol": {
+         "fixed": "img/icons/marker/circle.svg"
+        }
+       }
+      },
+      "tooltip": true
+     }
+    ]
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "id": 8,
+   "gridPos": {
+    "x": 8,
+    "y": 12,
+    "w": 16,
+    "h": 12
+   }
+  },
+  {
+   "type": "bargauge",
+   "title": "Top countries",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "topk(12, sum by (country) (count_over_time({job=\"access\", instance=~\"$instance\"} | country != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range])))",
+     "legendFormat": "{{country}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "orientation": "horizontal",
+    "displayMode": "gradient",
+    "showUnfilled": true,
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "values": false
+    },
+    "valueMode": "text"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "continuous-BlYlRd"
+     },
+     "displayName": "${__field.labels.country}"
+    },
+    "overrides": []
+   },
+   "id": 9,
+   "gridPos": {
+    "x": 0,
+    "y": 24,
+    "w": 8,
+    "h": 12
+   }
+  },
+  {
+   "type": "bargauge",
+   "title": "Top cities",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "topk(10, sum by (city) (count_over_time({job=\"access\", instance=~\"$instance\"} | city != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range])))",
+     "legendFormat": "{{city}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "orientation": "horizontal",
+    "displayMode": "gradient",
+    "showUnfilled": true,
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "values": false
+    },
+    "valueMode": "text"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "color": {
+      "mode": "continuous-BlYlRd"
+     },
+     "displayName": "${__field.labels.city}"
+    },
+    "overrides": []
+   },
+   "id": 10,
+   "gridPos": {
+    "x": 8,
+    "y": 24,
+    "w": 8,
+    "h": 9
+   }
+  },
+  {
+   "type": "piechart",
+   "title": "Browsers",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum by (browser) (count_over_time({job=\"access\", instance=~\"$instance\"} | browser != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range]))",
+     "legendFormat": "{{browser}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "pieType": "donut",
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "values": [
+      "percent"
+     ]
+    },
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "displayName": "${__field.labels.browser}"
+    },
+    "overrides": []
+   },
+   "id": 11,
+   "gridPos": {
+    "x": 16,
+    "y": 24,
+    "w": 8,
+    "h": 9
+   }
+  },
+  {
+   "type": "piechart",
+   "title": "Operating systems",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum by (os) (count_over_time({job=\"access\", instance=~\"$instance\"} | os != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range]))",
+     "legendFormat": "{{os}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "pieType": "donut",
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "values": [
+      "percent"
+     ]
+    },
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "displayName": "${__field.labels.os}"
+    },
+    "overrides": []
+   },
+   "id": 12,
+   "gridPos": {
+    "x": 0,
+    "y": 36,
+    "w": 8,
+    "h": 9
+   }
+  },
+  {
+   "type": "piechart",
+   "title": "Devices",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum by (device) (count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range]))",
+     "legendFormat": "{{device}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "pieType": "donut",
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "values": [
+      "percent"
+     ]
+    },
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "displayName": "${__field.labels.device}"
+    },
+    "overrides": []
+   },
+   "id": 13,
+   "gridPos": {
+    "x": 8,
+    "y": 36,
+    "w": 8,
+    "h": 9
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Responses by status",
+   "description": "",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum by (status) (count_over_time({job=\"access\", instance=~\"$instance\"} | json status=\"status\" [5m]))",
+     "legendFormat": "{{status}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 18,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "normal"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 14,
+   "gridPos": {
+    "x": 16,
+    "y": 36,
+    "w": 8,
+    "h": 9
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Bandwidth served / hour",
+   "description": "",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "sum(sum_over_time({job=\"access\", instance=~\"$instance\"} | json size=\"size\" | unwrap size [1h]))",
+     "legendFormat": "bytes",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "decbytes",
+     "custom": {
+      "drawStyle": "bars",
+      "lineWidth": 2,
+      "fillOpacity": 8,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 15,
+   "gridPos": {
+    "x": 0,
+    "y": 45,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Response time p95 (excl. live stream)",
+   "description": "",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "quantile_over_time(0.95, {job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\", duration=\"duration\" | uri !~ \"/api/stream.*\" | unwrap duration [5m]) by (instance)",
+     "legendFormat": "p95",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 8,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 16,
+   "gridPos": {
+    "x": 12,
+    "y": 45,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "logs",
+   "title": "Recent visitors",
+   "datasource": {
+    "type": "loki",
+    "uid": "${loki}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "${loki}"
+     },
+     "expr": "{job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\", status=\"status\", ref=\"request.headers.Referer[0]\" | uri !~ \"^/(api|assets|geo)/.*\" | line_format \"{{.country}} · {{.city}}   {{.browser}} / {{.os}} ({{.device}})   {{.status}} {{.uri}}   ← {{.ref}}\"",
+     "legendFormat": "",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "showTime": true,
+    "wrapLogMessage": true,
+    "sortOrder": "Descending",
+    "enableLogDetails": true
+   },
+   "id": 17,
+   "gridPos": {
+    "x": 0,
+    "y": 53,
+    "w": 24,
+    "h": 10
+   }
+  }
+ ],
+ "editable": true,
+ "links": [
+  {
+   "title": "OpenWatch dashboards",
+   "type": "dashboards",
+   "tags": [
+    "openwatch"
+   ],
+   "asDropdown": true
+  }
+ ]
+}
