@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+data/
+.dev/
+.env
+node_modules/
+dist/
+infrastructure/nginx/htpasswd

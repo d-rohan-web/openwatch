@@ -1,0 +1,303 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "class",
+   "classLabel",
+   "coord",
+   "operatorLabel",
+   "mw",
+   "inception",
+   "stateLabel"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q972715"
+    },
+    "mw": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "440"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q134447"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(80.175 12.55833333)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Madras Atomic Power Station"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear power plant"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Nuclear Power Corporation of India"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q972715"
+    },
+    "mw": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "440"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q134447"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(80.175 12.55833333)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Madras Atomic Power Station"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear power plant"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Bhavini"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1739415"
+    },
+    "mw": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "1140"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q134447"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(73.35 21.23861111)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Kakrapar Atomic Power Station"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear power plant"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Nuclear Power Corporation of India"
+    },
+    "stateLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "in use"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q854682"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q7315155"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(72.917777777 19.004722222)"
+    },
+    "inception": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1954-01-01T00:00:00Z"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Bhabha Atomic Research Centre"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "research center"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q854682"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q327333"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(72.917777777 19.004722222)"
+    },
+    "inception": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1954-01-01T00:00:00Z"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Bhabha Atomic Research Centre"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "government agency"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q3085713"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1438105"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(72.91861111 19.00777778)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "CIRUS reactor"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "research reactor"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Bhabha Atomic Research Centre"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q3664611"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q134447"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(80.175 12.558333)"
+    },
+    "itemLabel": {
+     "type": "literal",
+     "value": "Q3664611"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear power plant"
+    },
+    "stateLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "building or structure under construction"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q15229130"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q820477"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(86.22 22.39)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Jaduguda Uranium Mine"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "mine"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q16820666"
+    },
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q80877"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(72.92029572 19.008272992)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Dhruva reactor"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nuclear reactor"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Bhabha Atomic Research Centre"
+    }
+   }
+  ]
+ }
+}

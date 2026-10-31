@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule: { interval: weekly }
+    groups: { python: { patterns: ["*"], update-types: [minor, patch] } }
+  - package-ecosystem: npm
+    directory: /apps/frontend
+    schedule: { interval: weekly }
+    groups: { frontend: { patterns: ["*"], update-types: [minor, patch] } }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+  - package-ecosystem: docker
+    directories: [/apps/api, /apps/collector, /apps/frontend]
+    schedule: { interval: monthly }

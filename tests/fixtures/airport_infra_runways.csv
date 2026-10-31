@@ -1,0 +1,6 @@
+"id","airport_ref","airport_ident","length_ft","width_ft","surface","lighted","closed","le_ident","le_latitude_deg","le_longitude_deg","le_elevation_ft","le_heading_degT","le_displaced_threshold_ft","he_ident","he_latitude_deg","he_longitude_deg","he_elevation_ft","he_heading_degT","he_displaced_threshold_ft"
+236778,26555,"VIDP",9239,148,"ASPH",1,0,"09",28.570499,77.087997,731,91,,"27",28.569799,77.116997,752,271,499
+236779,26555,"VIDP",12510,148,"ASPH",1,0,"10",28.5672,77.084801,725,104,,"28",28.5585,77.122498,778,284,
+510252,26555,"VIDP",13681,148,"ASPH",0,0,"11L",28.550125,77.068176,736,103,,"29R",28.540747,77.111877,736,283,
+244968,3622,"KJFK",12079,200,"PEM",1,0,"04L",40.622002,-73.785599,12,31,463,"22R",40.6488,-73.764702,13,211,2696
+320229,43966,"IN-0011",,,,0,0,"08",,,,,,"26",,,,,

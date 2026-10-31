@@ -1,0 +1,159 @@
+{
+ "above": [
+  {
+   "@class": "com.eptisa.dto.StationWaterLevelAboveWarningDto",
+   "id": 5,
+   "stationCode": "024-mgd5pat",
+   "status": "WARNING",
+   "trend": "STEADY",
+   "value": 208.3
+  },
+  {
+   "@class": "com.eptisa.dto.StationWaterLevelAboveWarningDto",
+   "id": 7,
+   "stationCode": "029-ERDBWN",
+   "status": "WARNING",
+   "trend": "FALLING",
+   "value": 16.79
+  },
+  {
+   "@class": "com.eptisa.dto.StationWaterLevelAboveWarningDto",
+   "id": 8,
+   "stationCode": "060-erdbwn",
+   "status": "DANGER",
+   "trend": "RISING",
+   "value": 6.58
+  }
+ ],
+ "stations": [
+  {
+   "@class": "com.eptisa.dto.LayerStationDto",
+   "stationCode": "024-mgd5pat",
+   "name": "Daltonganj",
+   "stationUniqueCode": "CW1SON000140",
+   "telemetric": true
+  },
+  {
+   "@class": "com.eptisa.dto.LayerStationDto",
+   "stationCode": "029-ERDBWN",
+   "name": "Purusottampur",
+   "stationUniqueCode": null,
+   "telemetric": true
+  },
+  {
+   "@class": "com.eptisa.dto.LayerStationDto",
+   "stationCode": "060-erdbwn",
+   "name": "Mathani Road Bridge",
+   "stationUniqueCode": null,
+   "telemetric": true
+  }
+ ],
+ "geo": [
+  {
+   "@class": "com.eptisa.dto.LayerStationGeoDto",
+   "stationCode": "024-mgd5pat",
+   "lat": 24.033055555555556,
+   "lon": 84.06361111111111,
+   "savedAt": "2020-10-09",
+   "name": null,
+   "type": null
+  },
+  {
+   "@class": "com.eptisa.dto.LayerStationGeoDto",
+   "stationCode": "029-ERDBWN",
+   "lat": 19.516666666666666,
+   "lon": 84.88333333333334,
+   "savedAt": "2020-10-09",
+   "name": null,
+   "type": null
+  },
+  {
+   "@class": "com.eptisa.dto.LayerStationGeoDto",
+   "stationCode": "060-erdbwn",
+   "lat": 21.66,
+   "lon": 87.06,
+   "savedAt": "2020-10-09",
+   "name": null,
+   "type": null
+  }
+ ],
+ "static": [
+  {
+   "@class": "com.eptisa.dto.FloodForecastStaticDto",
+   "stationCode": "024-mgd5pat",
+   "dangerLevel": 209.0,
+   "dlEndDate": null,
+   "dlStartDate": null,
+   "frl": null,
+   "frlEndDate": null,
+   "frlStartDate": null,
+   "highestFlowLevel": 210.91,
+   "highestFlowLevelDate": "1976-09-17",
+   "meteorologicalSubDivision": null,
+   "modesOfCommunication": [
+    "GSM"
+   ],
+   "mwl": null,
+   "mwlEndDate": null,
+   "mwlStartDate": null,
+   "nearestTown": "",
+   "savedAt": "2014-05-30",
+   "type": "Base",
+   "warningLevel": 208.0,
+   "wlEndDate": null,
+   "wlStartDate": null
+  },
+  {
+   "@class": "com.eptisa.dto.FloodForecastStaticDto",
+   "stationCode": "029-ERDBWN",
+   "dangerLevel": 16.835,
+   "dlEndDate": null,
+   "dlStartDate": null,
+   "frl": null,
+   "frlEndDate": null,
+   "frlStartDate": null,
+   "highestFlowLevel": 19.655,
+   "highestFlowLevelDate": "1990-11-04",
+   "meteorologicalSubDivision": "Odisha",
+   "modesOfCommunication": [
+    "Wireless",
+    "Telemetry",
+    "Manual"
+   ],
+   "mwl": null,
+   "mwlEndDate": null,
+   "mwlStartDate": null,
+   "nearestTown": "berhempur",
+   "savedAt": "2014-04-24",
+   "type": "Level",
+   "warningLevel": 15.835,
+   "wlEndDate": null,
+   "wlStartDate": null
+  },
+  {
+   "@class": "com.eptisa.dto.FloodForecastStaticDto",
+   "stationCode": "060-erdbwn",
+   "dangerLevel": 6.5,
+   "dlEndDate": null,
+   "dlStartDate": null,
+   "frl": null,
+   "frlEndDate": null,
+   "frlStartDate": null,
+   "highestFlowLevel": 7.31,
+   "highestFlowLevelDate": "2021-09-22",
+   "meteorologicalSubDivision": null,
+   "modesOfCommunication": [
+    null
+   ],
+   "mwl": null,
+   "mwlEndDate": null,
+   "mwlStartDate": null,
+   "nearestTown": "",
+   "savedAt": "2017-06-03",
+   "type": "Level",
+   "warningLevel": 6.0,
+   "wlEndDate": null,
+   "wlStartDate": null
+  }
+ ]
+}

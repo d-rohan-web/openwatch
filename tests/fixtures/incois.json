@@ -1,0 +1,306 @@
+{
+ "hwassa": {
+  "LatestHWADate": "20261030",
+  "HWAJson": "[]",
+  "LatestSSADate": "20261030",
+  "SSAJson": "[{\"OBJECTID\": 242, \"District\": \"MINICOY\", \"STATE\": \"LAKSHADWEEP\", \"Message\": \"Swell Surge Watch for the coast of MINICOY,LAKSHADWEEP. Swell waves in the range of 12.0 - 13.0 sec period with 1.0 - 1.2 m height are forecasted during  17:30 hours on 30-10-2026 to 08:30 hours on 01-11-2026. It advised that no immediate action is required. Check for updates.\", \"Alert\": \"SWELL SURGE WATCH\", \"Color\": \"Yellow\", \"Issue Date\": \"30-10-2026\"}]"
+ },
+ "currents": {
+  "LatestCurrentsDate": "20261029",
+  "CurrentsJson": "[{\"OBJECTID\": 284, \"District\": \"NELLORE\", \"STATE\": \"ANDHRA PRADESH\", \"Message\": \"Ocean Currents Watch for the coast of NELLORE,ANDHRA PRADESH from Coromandel To Vatturupapallepalam. Surface current speeds in the range of 0.5 - 0.6  m/sec are forecasted during 10:00 hours on 31-10-2026 to 10:00 hours on 01-11-2026. It advised that no immediate action is required. Check for updates.\", \"Alert\": \"OCEAN CURRENT WATCH\", \"Color\": \"Yellow\", \"Issue Date\": \"30-10-2026\"}, {\"OBJECTID\": 294, \"District\": \"EAST GODAVARI\", \"STATE\": \"ANDHRA PRADESH\", \"Message\": \"Ocean Currents Alert for the coast of EAST GODAVARI,ANDHRA PRADESH from Antarvedi To Perumallapuram. Surface current speeds in the range of 1.1 - 1.3  m/sec are forecasted during 22:00 hours on 30-10-2026 to 19:00 hours on 01-11-2026. It advised that Harbour & marine operations to be careful. \", \"Alert\": \"OCEAN CURRENT ALERT\", \"Color\": \"Orange\", \"Issue Date\": \"30-10-2026\"}]"
+ },
+ "polygons": {
+  "type": "FeatureCollection",
+  "features": [
+   {
+    "type": "Feature",
+    "geometry": {
+     "type": "MultiPolygon",
+     "coordinates": [
+      [
+       [
+        [
+         73.08195,
+         8.777544
+        ],
+        [
+         73.228298,
+         8.752649
+        ],
+        [
+         73.357252,
+         8.682431
+        ],
+        [
+         73.456286,
+         8.575275
+        ],
+        [
+         73.518886,
+         8.42967
+        ],
+        [
+         73.528906,
+         8.287784
+        ],
+        [
+         73.498682,
+         8.159571
+        ],
+        [
+         73.43792,
+         8.031402
+        ],
+        [
+         73.331389,
+         7.916676
+        ],
+        [
+         73.21513,
+         7.848804
+        ],
+        [
+         73.057112,
+         7.816534
+        ],
+        [
+         72.90325,
+         7.835321
+        ],
+        [
+         72.761159,
+         7.902976
+        ],
+        [
+         72.655009,
+         8.007193
+        ],
+        [
+         72.586008,
+         8.149483
+        ],
+        [
+         72.569019,
+         8.307509
+        ],
+        [
+         72.60374,
+         8.452813
+        ],
+        [
+         72.68328,
+         8.577732
+        ],
+        [
+         72.793738,
+         8.674561
+        ],
+        [
+         72.929177,
+         8.751379
+        ],
+        [
+         73.077824,
+         8.777569
+        ]
+       ],
+       [
+        [
+         73.080399,
+         8.327922
+        ],
+        [
+         73.075143,
+         8.322361
+        ],
+        [
+         73.07125,
+         8.315141
+        ],
+        [
+         73.06736,
+         8.30681
+        ],
+        [
+         73.063187,
+         8.295141
+        ],
+        [
+         73.059303,
+         8.289582
+        ],
+        [
+         73.054031,
+         8.282084
+        ],
+        [
+         73.04847,
+         8.27792
+        ],
+        [
+         73.040703,
+         8.274032
+        ],
+        [
+         73.022363,
+         8.275415
+        ],
+        [
+         73.018753,
+         8.274032
+        ],
+        [
+         73.026527,
+         8.268471
+        ],
+        [
+         73.050141,
+         8.267641
+        ],
+        [
+         73.054031,
+         8.272917
+        ],
+        [
+         73.057359,
+         8.27653
+        ],
+        [
+         73.061532,
+         8.280694
+        ],
+        [
+         73.066528,
+         8.285421
+        ],
+        [
+         73.067916,
+         8.30431
+        ],
+        [
+         73.071809,
+         8.312921
+        ],
+        [
+         73.075692,
+         8.320141
+        ],
+        [
+         73.079865,
+         8.325693
+        ]
+       ]
+      ]
+     ]
+    },
+    "properties": {
+     "OBJECTID": 242,
+     "District": "MINICOY",
+     "STATE": "LAKSHADWEEP"
+    }
+   },
+   {
+    "type": "Feature",
+    "geometry": {
+     "type": "MultiPolygon",
+     "coordinates": [
+      [
+       [
+        [
+         82.839284,
+         16.900499
+        ],
+        [
+         81.789306,
+         16.342083
+        ],
+        [
+         81.904587,
+         16.388751
+        ],
+        [
+         82.012641,
+         16.429581
+        ],
+        [
+         82.095971,
+         16.474307
+        ],
+        [
+         82.185418,
+         16.519028
+        ],
+        [
+         82.301795,
+         16.56514
+        ],
+        [
+         82.296806,
+         16.598194
+        ],
+        [
+         82.272087,
+         16.639859
+        ],
+        [
+         82.263198,
+         16.714031
+        ],
+        [
+         82.345969,
+         16.778191
+        ],
+        [
+         82.362915,
+         16.929861
+        ],
+        [
+         82.349297,
+         16.960971
+        ],
+        [
+         82.314308,
+         16.841806
+        ],
+        [
+         82.259583,
+         16.888472
+        ],
+        [
+         82.285415,
+         16.983195
+        ],
+        [
+         82.320694,
+         17.060973
+        ],
+        [
+         82.364029,
+         17.110416
+        ],
+        [
+         82.410697,
+         17.146529
+        ],
+        [
+         82.469307,
+         17.197083
+        ],
+        [
+         82.539855,
+         17.247433
+        ]
+       ]
+      ]
+     ]
+    },
+    "properties": {
+     "OBJECTID": 294,
+     "District": "EAST GODAVARI",
+     "STATE": "ANDHRA PRADESH"
+    }
+   }
+  ]
+ },
+ "tsunami": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><events/>"
+}

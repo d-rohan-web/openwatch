@@ -1,0 +1,22 @@
+name: New data source
+description: Suggest a public live data source for India
+labels: [data-source]
+body:
+  - type: input
+    id: url
+    attributes: { label: Source URL }
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes: { label: What does it provide?, description: Update frequency, location detail, format (API/RSS/page/PDF). }
+    validations: { required: true }
+  - type: input
+    id: licence
+    attributes: { label: Licence / terms, description: Link to the terms if you found them. }
+  - type: checkboxes
+    id: public
+    attributes:
+      label: Access
+      options:
+        - label: It's publicly accessible without login, CAPTCHA or IP allow-listing
+          required: true

@@ -1,0 +1,21 @@
+[
+  {"MessageType": "ShipStaticData",
+   "MetaData": {"MMSI": 419001234, "MMSI_String": 419001234, "ShipName": "INS EXAMPLE", "latitude": 18.9, "longitude": 72.8,
+                "time_utc": "2026-10-30 06:10:01.123456789 +0000 UTC"},
+   "Message": {"ShipStaticData": {"AisVersion": 0, "CallSign": "AVXX  ", "Destination": "MUMBAI@@@@@@@@@@@@@@", "Dimension": {"A": 100, "B": 63, "C": 8, "D": 9},
+               "Dte": false, "Eta": {"Day": 31, "Hour": 4, "Minute": 0, "Month": 10}, "FixType": 1, "ImoNumber": 0,
+               "MaximumStaticDraught": 6.5, "MessageID": 5, "Name": "INS EXAMPLE         ", "RepeatIndicator": 0, "Spare": false,
+               "Type": 35, "UserID": 419001234, "Valid": true}}},
+  {"MessageType": "PositionReport",
+   "MetaData": {"MMSI": 419001234, "MMSI_String": 419001234, "ShipName": "INS EXAMPLE         ", "latitude": 18.91, "longitude": 72.81,
+                "time_utc": "2026-10-30 06:12:32.318353 +0000 UTC"},
+   "Message": {"PositionReport": {"Cog": 308, "CommunicationState": 81982, "Latitude": 18.91, "Longitude": 72.81, "MessageID": 1,
+               "NavigationalStatus": 0, "PositionAccuracy": true, "Raim": false, "RateOfTurn": 4, "RepeatIndicator": 0, "Sog": 12.4,
+               "Spare": 0, "SpecialManoeuvreIndicator": 0, "Timestamp": 31, "TrueHeading": 511, "UserID": 419001234, "Valid": true}}},
+  {"MessageType": "PositionReport",
+   "MetaData": {"MMSI": 259000420, "MMSI_String": 259000420, "ShipName": "AUGUSTSON", "latitude": 9.95, "longitude": 76.25,
+                "time_utc": "2026-10-30 06:12:40 +0000 UTC"},
+   "Message": {"PositionReport": {"Cog": 0, "CommunicationState": 0, "Latitude": 91, "Longitude": 181, "MessageID": 1,
+               "NavigationalStatus": 15, "PositionAccuracy": false, "Raim": false, "RateOfTurn": 0, "RepeatIndicator": 0, "Sog": 0,
+               "Spare": 0, "SpecialManoeuvreIndicator": 0, "Timestamp": 60, "TrueHeading": 511, "UserID": 259000420, "Valid": true}}}
+]

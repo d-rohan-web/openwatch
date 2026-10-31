@@ -1,0 +1,20 @@
+{"pageSize": 1000, "pageNum": 1, "totalCount": 2, "totalPages": 1, "items": [
+ {"type": "Feature", "properties": {"coreNOTAMData": {
+   "notamEvent": {"scenario": "6000"},
+   "notam": {"id": "NOTAM_1_00000001", "series": "A", "number": "A2345/26", "type": "N", "issued": "2026-10-28T06:12:00.000Z",
+     "affectedFIR": "VABF", "selectionCode": "QRDCA", "traffic": "IV", "purpose": "BO", "scope": "W", "minimumFL": "000", "maximumFL": "999",
+     "location": "VABF", "effectiveStart": "2026-11-02T03:30:00.000Z", "effectiveEnd": "2026-11-02T10:30:00.000Z",
+     "text": "MISSILE FIRING WILL TAKE PLACE IN DANGER AREA VAD11", "classification": "INTL", "accountId": "VABB",
+     "lastUpdated": "2026-10-28T06:12:00.000Z", "icaoLocation": "VABF", "coordinates": "1905N07210E", "radius": "015"},
+   "notamTranslation": [{"type": "ICAO", "formattedText": "A2345/26 NOTAMN\nQ) VABF/QRDCA/IV/BO/W/000/999/1905N07210E015\nA) VABF B) 2611020330 C) 2611021030\nD) 0330-1030\nE) MISSILE FIRING WILL TAKE PLACE IN DANGER AREA VAD11\nF) GND G) UNL"}]}},
+  "geometry": {"type": "Point", "coordinates": [72.1667, 19.0833]}},
+ {"type": "Feature", "properties": {"coreNOTAMData": {
+   "notamEvent": {"scenario": "6000"},
+   "notam": {"id": "NOTAM_1_00000002", "series": "A", "number": "A2350/26", "type": "N", "issued": "2026-10-29T10:00:00.000Z",
+     "affectedFIR": "VIDF", "selectionCode": "QMRLC", "traffic": "IV", "purpose": "NBO", "scope": "A", "minimumFL": "000", "maximumFL": "999",
+     "location": "VIDP", "effectiveStart": "2026-10-30T00:00:00.000Z", "effectiveEnd": "PERM",
+     "text": "RWY 10/28 CLSD", "classification": "INTL", "accountId": "VIDP",
+     "lastUpdated": "2026-10-29T10:00:00.000Z", "icaoLocation": "VIDP", "coordinates": "2834N07706E", "radius": "005"},
+   "notamTranslation": [{"type": "ICAO", "formattedText": "A2350/26 NOTAMN\nQ) VIDF/QMRLC/IV/NBO/A/000/999/2834N07706E005\nA) VIDP B) 2610300000 C) PERM\nE) RWY 10/28 CLSD"}]}},
+  "geometry": {"type": "Point", "coordinates": [77.1, 28.5667]}}
+]}

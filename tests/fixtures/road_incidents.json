@@ -1,0 +1,38 @@
+{
+ "incidents": [
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "4819f7d0a8b2a7f6dd6f3a1b5a5e5e6b",
+    "iconCategory": 6,
+    "magnitudeOfDelay": 3,
+    "events": [{"description": "Stationary traffic", "code": 108, "iconCategory": 6}],
+    "startTime": "2026-10-31T03:51:00Z",
+    "endTime": "2026-10-31T05:13:00Z",
+    "from": "Dhaula Kuan",
+    "to": "Rajokri Flyover",
+    "length": 4035.5,
+    "delay": 933,
+    "roadNumbers": ["NH48"]
+   },
+   "geometry": {"type": "LineString", "coordinates": [[77.1612, 28.5918], [77.1450, 28.5650], [77.1101, 28.5321]]}
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "TTI-1f2e3d4c-0001",
+    "iconCategory": 8,
+    "magnitudeOfDelay": 4,
+    "events": [{"description": "Closed", "code": 401, "iconCategory": 8}],
+    "startTime": "2026-10-30T18:30:00Z",
+    "endTime": null,
+    "from": "Minto Road",
+    "to": "Barakhamba Road",
+    "length": 820.0,
+    "delay": 0,
+    "roadNumbers": []
+   },
+   "geometry": {"type": "Point", "coordinates": [77.2245, 28.6315]}
+  }
+ ]
+}

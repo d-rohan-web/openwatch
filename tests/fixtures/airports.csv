@@ -1,0 +1,7 @@
+"id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","icao_code","iata_code","gps_code","local_code","home_link","wikipedia_link","keywords"
+35130,"IN-0002","heliport","Tawang Air Force Station",27.588732,91.877439,8756,"AS","IN","IN-AR","Tawang","no",,,,,,,
+42716,"IN-0003","small_airport","Daulat Beg Oldi Advanced Landing Ground",35.396467,77.928965,16200,"AS","IN","IN-LA","Nubra","no",,,,,,"https://en.wikipedia.org/wiki/Daulat_Beg_Oldi_Advanced_Landing_Ground",
+42721,"IN-0005","closed","Kayathar Airstrip",8.970609,77.816847,,"AS","IN","IN-TN","Ahilandapuram","no",,,,,,,
+3622,"KJFK","large_airport","John F. Kennedy International Airport",40.639447,-73.779317,13,"NA","US","US-NY","New York","yes","KJFK","JFK","KJFK","JFK","https://www.jfkairport.com/","https://en.wikipedia.org/wiki/John_F._Kennedy_International_Airport","Manhattan, New York City, NYC, Idlewild, IDL, KIDL"
+26555,"VIDP","large_airport","Indira Gandhi International Airport",28.55563,77.09519,777,"AS","IN","IN-DL","New Delhi","yes","VIDP","DEL","VIDP",,"https://www.newdelhiairport.in/","https://en.wikipedia.org/wiki/Indira_Gandhi_International_Airport","Palam Air Force Station"
+35145,"VOBL","large_airport","Kempegowda International Airport Bengaluru",13.1979,77.706299,3000,"AS","IN","IN-KA","Bengaluru","yes","VOBL","BLR","VOBL",,"http://www.bengaluruairport.com/home/home.jspx","https://en.wikipedia.org/wiki/Kempegowda_International_Airport","Bangalore"

@@ -1,0 +1,150 @@
+# OpenWatch · docker compose
+#
+#   cp .env.example .env                                  # first time; add any API keys you have
+#   docker compose up -d --build                          # core: nginx + frontend + api + collector + redis
+#   docker compose --profile monitoring up -d             # + prometheus, loki, alloy, grafana
+#   docker compose logs -f collector                      # JSON logs
+#   docker compose down                                   # stop (data stays in ./data)
+#
+# UI: https://localhost:${OPENWATCH_HTTPS_PORT:-39443}   Grafana: http://localhost:39300 (monitoring profile)
+name: openwatch
+
+x-env-common: &env-common
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  REDIS_URL: redis://redis:6379/0
+  OPENWATCH_DATA_DIR: /data
+  OPENWATCH_SCOPE: ${OPENWATCH_SCOPE:-india}     # india | global (worldwide aircraft, ships, quakes, satellites, news)
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "20m", max-file: "5" }
+
+services:
+  # ---------------------------------------------------------- web
+  certs-init:
+    image: alpine/openssl:3.5.4
+    entrypoint: ["/bin/sh", "/generate.sh"]
+    environment:
+      OPENWATCH_HOSTNAME: ${OPENWATCH_HOSTNAME:-localhost}
+    volumes:
+      - ./infrastructure/certs-init/generate.sh:/generate.sh:ro
+      - certs:/certs
+    restart: "no"
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      certs-init: { condition: service_completed_successfully }
+      api: { condition: service_started }
+      frontend: { condition: service_started }
+    ports:
+      - "${OPENWATCH_HTTPS_PORT:-39443}:443"
+      - "${OPENWATCH_HTTP_PORT:-39080}:80"
+    environment:
+      OPENWATCH_HTTPS_PORT: ${OPENWATCH_HTTPS_PORT:-39443}
+      OPENWATCH_AUTH: ${OPENWATCH_AUTH:-off}
+    volumes:
+      - ./infrastructure/nginx/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ${OPENWATCH_HTPASSWD:-./infrastructure/nginx/htpasswd.example}:/etc/nginx/htpasswd:ro
+      - certs:/etc/nginx/certs:ro
+    restart: unless-stopped
+    logging: *logging
+
+  frontend:
+    build: ./apps/frontend
+    restart: unless-stopped
+    logging: *logging
+
+  # ---------------------------------------------------------- app
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    environment:
+      <<: *env-common
+      TOMTOM_KEY: ${TOMTOM_KEY:-}
+      OPENWATCH_MAX_EXPORT_DAYS: ${OPENWATCH_MAX_EXPORT_DAYS:-31}
+      OPENWATCH_EXPORT_ENABLED: ${OPENWATCH_EXPORT_ENABLED:-false}   # bulk export + archive search (off until paid access)
+    volumes:
+      - archive:/data:ro          # read-only: only the collector writes the archive
+    depends_on:
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+    restart: unless-stopped
+    logging: *logging
+
+  collector:
+    build: { context: ., dockerfile: apps/collector/Dockerfile }
+    env_file: [{ path: .env, required: false }]   # feed API keys (see .env.example)
+    environment:
+      <<: *env-common
+      OPENWATCH_FEEDS: ${OPENWATCH_FEEDS:-}
+      OPENWATCH_RETENTION_DAYS: ${OPENWATCH_RETENTION_DAYS:-0}
+      OPENWATCH_RAW_RETENTION_DAYS: ${OPENWATCH_RAW_RETENTION_DAYS:-90}
+    volumes:
+      - archive:/data
+    depends_on:
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+    logging: *logging
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]  # live state only; the archive is the record
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+    restart: unless-stopped
+    logging: *logging
+
+  # ---------------------------------------------------------- monitoring (profile)
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    profiles: ["monitoring"]
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=30d"]
+    volumes:
+      - ./infrastructure/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus:/prometheus
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.5.3
+    profiles: ["monitoring"]
+    command: ["-config.file=/etc/loki/config.yaml"]
+    volumes:
+      - ./infrastructure/monitoring/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki:/loki
+    restart: unless-stopped
+
+  alloy:
+    image: grafana/alloy:v1.10.2
+    profiles: ["monitoring"]
+    command: ["run", "/etc/alloy/config.alloy", "--storage.path=/var/lib/alloy"]
+    volumes:
+      - ./infrastructure/monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on: [loki]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    profiles: ["monitoring"]
+    ports: ["${OPENWATCH_GRAFANA_PORT:-39300}:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - ./infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana:/var/lib/grafana
+    depends_on: [prometheus, loki]
+    restart: unless-stopped
+
+volumes:
+  archive:                       # the dataset: every record + raw source bytes (back this up)
+  certs:
+  prometheus:
+  loki:
+  grafana:

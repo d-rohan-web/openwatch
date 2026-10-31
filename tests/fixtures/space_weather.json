@@ -1,0 +1,87 @@
+{
+ "kp": [
+  {
+   "time_tag": "2026-10-30T12:00:00",
+   "Kp": 2.33,
+   "a_running": 9,
+   "station_count": 8
+  },
+  {
+   "time_tag": "2026-10-30T15:00:00",
+   "Kp": 1.67,
+   "a_running": 6,
+   "station_count": 8
+  },
+  {
+   "time_tag": "2026-10-30T18:00:00",
+   "Kp": 1.33,
+   "a_running": 5,
+   "station_count": 8
+  }
+ ],
+ "flare": [
+  {
+   "time_tag": "2026-10-30T21:24:00Z",
+   "satellite": 18,
+   "current_class": "B1.8",
+   "current_ratio": 0.005468183584704353,
+   "current_int_xrlong": 0.0007209775503724813,
+   "begin_time": "2026-10-30T15:54:00Z",
+   "begin_class": "B2.7",
+   "max_time": "2026-10-30T16:07:00Z",
+   "max_class": "B5.7",
+   "max_xrlong": 5.72200747228635e-07,
+   "end_time": "2026-10-30T16:19:00Z",
+   "max_ratio_time": "2026-10-30T16:06:47Z",
+   "max_ratio": 0.19420532216126699,
+   "end_class": "B4.1"
+  }
+ ],
+ "alerts": [
+  {
+   "product_id": "K07A",
+   "issue_datetime": "2026-10-10 19:27:12.427",
+   "message": "Space Weather Message Code: ALTK07\r\nSerial Number: 220\r\nIssue Time: 2026 Oct 10 1927 UTC\r\n\r\nALERT: Geomagnetic K-index of 7 \nThreshold Reached: 2026 Oct 10 1926 UTC\nSynoptic Period: 1800-2100\nActive Warning: YES\nNoaa Scale: G3 - Strong\nComment: \r\n\r\nNOAA Scale: G3 - Strong"
+  },
+  {
+   "product_id": "K05A",
+   "issue_datetime": "2026-10-10 18:18:53.587",
+   "message": "Space Weather Message Code: ALTK05\r\nSerial Number: 2056\r\nIssue Time: 2026 Oct 10 1818 UTC\r\n\r\nALERT: Geomagnetic K-index of 5 \nThreshold Reached: 2026 Oct 10 1818 UTC\nSynoptic Period: 1800-2100\nActive Warning: YES\nNoaa Scale: G1 - Minor\nComment: \r\n\r\nNOAA Scale: G1 - Minor\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 60 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nSpacecraft - Minor impact on satellite operations possible.\r\nAurora - Aurora may be visible at high latitudes, i.e., northern tier of the U.S. such as northern Michigan and Maine."
+  },
+  {
+   "product_id": "K07A",
+   "issue_datetime": "2026-10-10 17:58:50.070",
+   "message": "Space Weather Message Code: ALTK07\r\nSerial Number: 219\r\nIssue Time: 2026 Oct 10 1758 UTC\r\n\r\nALERT: Geomagnetic K-index of 7 \nThreshold Reached: 2026 Oct 10 1758 UTC\nSynoptic Period: 1500-1800\nActive Warning: YES\nNoaa Scale: G3 - Strong\nComment: \r\n\r\nNOAA Scale: G3 - Strong"
+  },
+  {
+   "product_id": "K07W",
+   "issue_datetime": "2026-10-10 17:42:57.273",
+   "message": "Space Weather Message Code: WARK07\r\nSerial Number: 153\r\nIssue Time: 2026 Oct 10 1742 UTC\r\n\r\nWARNING: Geomagnetic K-index of 7 or greater expected \nValid From: 2026 Oct 10 1742 UTC\nValid To: 2026 Oct 10 2359 UTC\nWarning Conditions: Onset\nNoaa Scale: G3 - Greater\nComment: \r\n\r\nNOAA Scale: G3 - Greater"
+  },
+  {
+   "product_id": "K05A",
+   "issue_datetime": "2026-10-10 15:35:28.653",
+   "message": "Space Weather Message Code: ALTK05\r\nSerial Number: 2055\r\nIssue Time: 2026 Oct 10 1535 UTC\r\n\r\nALERT: Geomagnetic K-index of 5 \nThreshold Reached: 2026 Oct 10 1535 UTC\nSynoptic Period: 1500-1800\nActive Warning: YES\nNoaa Scale: G1 - Minor\nComment: \r\n\r\nNOAA Scale: G1 - Minor\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 60 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nSpacecraft - Minor impact on satellite operations possible.\r\nAurora - Aurora may be visible at high latitudes, i.e., northern tier of the U.S. such as northern Michigan and Maine."
+  },
+  {
+   "product_id": "XM5S",
+   "issue_datetime": "2026-10-10 15:27:55.997",
+   "message": "Space Weather Message Code: SUMXM5\r\nSerial Number: 328\r\nIssue Time: 2026 Oct 10 1527 UTC\r\n\r\nSUMMARY: X-ray Event exceeded M5 \nBegin Time: 2026 Oct 10 1458 UTC\nMaximum Time: 2026 Oct 10 1510 UTC\nEnd Time: 2026 Oct 10 1520 UTC\nXray Class: M6.4\nOptical Class: \nLocation: N08W50\nNoaa Scale: R2 - Moderate\nComment: \r\n\r\nNOAA Scale: R2 - Moderate\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact centered primarily on sub-solar point on the sunlit side of Earth.\r\nRadio - Limited blackout of HF (high frequency) radio communication for tens of minutes."
+  },
+  {
+   "product_id": "TIIA",
+   "issue_datetime": "2026-10-10 15:26:24.740",
+   "message": "Space Weather Message Code: ALTTP2\r\nSerial Number: 1532\r\nIssue Time: 2026 Oct 10 1526 UTC\r\n\r\nALERT: Type II Radio Emission \nBegin Time: 2026 Oct 10 1515 UTC\nEstimate Velocity: 929 km/s\nComment: "
+  },
+  {
+   "product_id": "K04W",
+   "issue_datetime": "2026-10-10 14:40:44.390",
+   "message": "Space Weather Message Code: WARK04\r\nSerial Number: 5431\r\nIssue Time: 2026 Oct 10 1440 UTC\r\n\r\nEXTENDED WARNING: Geomagnetic K-index of 4 expected\nExtension to Serial Number: 5430\nValid From: 2026 Oct 09 0128 UTC\nNow Valid Until: 2026 Oct 11 0600 UTC\nWarning Condition: Persistence\n\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska."
+  },
+  {
+   "product_id": "EF3A",
+   "issue_datetime": "2026-10-30 14:59:54.440",
+   "message": "Space Weather Message Code: ALTEF3\r\nSerial Number: 3762\r\nIssue Time: 2026 Oct 30 1459 UTC\r\n\r\nCONTINUED ALERT: Electron 2MeV Integral Flux exceeded 1,000pfu\nContinuation of Serial Number: 3761\nBegin Time: 2026 Oct 23 1140 UTC\n\nYesterday Maximum 2MeV Flux: 1228 pfu\nMax time: 2026 Oct 29 1630 UTC"
+  }
+ ]
+}

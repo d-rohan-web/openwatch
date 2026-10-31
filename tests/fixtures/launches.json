@@ -1,0 +1,443 @@
+{
+ "results": [
+  {
+   "id": "20d5676e-111b-40e3-8923-b218c3665ca2",
+   "name": "GSLV Mk II | IRNSS-1L (NVS-03)",
+   "status": {
+    "id": 9,
+    "name": "Payload Deployed",
+    "abbrev": "Deployed",
+    "description": "Deployment of the payload(s) has been confirmed."
+   },
+   "last_updated": "2026-10-30T19:04:57Z",
+   "net": "2026-10-30T18:21:00Z",
+   "net_precision": {
+    "id": 1,
+    "name": "Minute",
+    "abbrev": "MIN",
+    "description": "The T-0 is accurate to the minute."
+   },
+   "window_end": "2026-10-30T21:00:00Z",
+   "window_start": "2026-10-30T17:00:00Z",
+   "launch_service_provider": {
+    "response_mode": "list",
+    "id": 31,
+    "url": "https://ll.thespacedevs.com/2.3.0/agencies/31/",
+    "name": "Indian Space Research Organization",
+    "abbrev": "ISRO",
+    "type": {
+     "id": 1,
+     "name": "Government"
+    }
+   },
+   "rocket": {
+    "id": 8637,
+    "configuration": {
+     "response_mode": "list",
+     "id": 168,
+     "url": "https://ll.thespacedevs.com/2.3.0/launcher_configurations/168/",
+     "name": "GSLV Mk II",
+     "families": [
+      {
+       "response_mode": "list",
+       "id": 84,
+       "name": "GSLV"
+      }
+     ],
+     "full_name": "GSLV Mk. II",
+     "variant": ""
+    }
+   },
+   "mission": {
+    "id": 7229,
+    "name": "IRNSS-1L (NVS-03)",
+    "type": "Navigation",
+    "description": "This is a replacement satellite for the Indian Regional Navigation Satellite System. The constellation will provide India with an alternative to GPS and will be used for military and civilian use. Located at a geosynchronous orbit, the system will be operated by the Indian government.",
+    "orbit": {
+     "id": 2,
+     "name": "Geostationary Transfer Orbit",
+     "abbrev": "GTO",
+     "celestial_body": {
+      "response_mode": "list",
+      "id": 1,
+      "name": "Earth"
+     }
+    },
+    "agencies": [
+     {
+      "id": 31,
+      "name": "Indian Space Research Organization",
+      "abbrev": "ISRO",
+      "country": [
+       {
+        "id": 9,
+        "name": "India",
+        "alpha_2_code": "IN",
+        "alpha_3_code": "IND",
+        "nationality_name": "Indian",
+        "nationality_name_composed": "Indo"
+       }
+      ]
+     }
+    ]
+   },
+   "pad": {
+    "id": 82,
+    "name": "Satish Dhawan Space Centre Second Launch Pad",
+    "latitude": 13.7199,
+    "longitude": 80.2304,
+    "country": {
+     "id": 9,
+     "name": "India",
+     "alpha_2_code": "IN",
+     "alpha_3_code": "IND",
+     "nationality_name": "Indian",
+     "nationality_name_composed": "Indo"
+    },
+    "location": {
+     "id": 14,
+     "name": "Satish Dhawan Space Centre, India"
+    },
+    "agencies": [
+     {
+      "id": 31,
+      "name": "Indian Space Research Organization",
+      "abbrev": "ISRO",
+      "country": [
+       {
+        "id": 9,
+        "name": "India",
+        "alpha_2_code": "IN",
+        "alpha_3_code": "IND",
+        "nationality_name": "Indian",
+        "nationality_name_composed": "Indo"
+       }
+      ]
+     }
+    ]
+   },
+   "webcast_live": false
+  },
+  {
+   "id": "f3f201cd-0ff9-4ff7-9aaa-1d22c399c75a",
+   "name": "Kinetica 2 | SpaceSail Polar Group TBD?",
+   "status": {
+    "id": 1,
+    "name": "Go for Launch",
+    "abbrev": "Go",
+    "description": "Current T-0 confirmed by official or reliable sources."
+   },
+   "last_updated": "2026-10-28T19:41:36Z",
+   "net": "2026-11-03T00:10:00Z",
+   "net_precision": {
+    "id": 2,
+    "name": "Hour",
+    "abbrev": "HR",
+    "description": "The T-0 is accurate to the hour."
+   },
+   "window_end": "2026-11-03T00:33:00Z",
+   "window_start": "2026-11-03T00:05:00Z",
+   "launch_service_provider": {
+    "response_mode": "list",
+    "id": 1040,
+    "url": "https://ll.thespacedevs.com/2.3.0/agencies/1040/",
+    "name": "CAS Space",
+    "abbrev": "CAS",
+    "type": {
+     "id": 3,
+     "name": "Commercial"
+    }
+   },
+   "rocket": {
+    "id": 9289,
+    "configuration": {
+     "response_mode": "list",
+     "id": 541,
+     "url": "https://ll.thespacedevs.com/2.3.0/launcher_configurations/541/",
+     "name": "Kinetica 2",
+     "families": [],
+     "full_name": "Kinetica 2",
+     "variant": ""
+    }
+   },
+   "mission": {
+    "id": 7888,
+    "name": "SpaceSail Polar Group TBD?",
+    "type": "Communications",
+    "description": "Low Earth Orbit communication satellites with Ku, Q and V band payloads for the G60 constellation operated by Shanghai Spacesail Technologies with funding backed by the Shanghai local government.\r\n\r\nInitial constellation will consist of 1296 satellites by 2027 with long term plans to expand it to 12000 satellites.",
+    "orbit": {
+     "id": 13,
+     "name": "Polar Orbit",
+     "abbrev": "PO",
+     "celestial_body": {
+      "response_mode": "list",
+      "id": 1,
+      "name": "Earth"
+     }
+    },
+    "agencies": []
+   },
+   "pad": {
+    "id": 244,
+    "name": "Launch Area 140",
+    "latitude": 40.81748,
+    "longitude": 100.21939,
+    "country": {
+     "id": 6,
+     "name": "China",
+     "alpha_2_code": "CN",
+     "alpha_3_code": "CHN",
+     "nationality_name": "Chinese",
+     "nationality_name_composed": "Sino"
+    },
+    "location": {
+     "id": 17,
+     "name": "Jiuquan Satellite Launch Center, People's Republic of China"
+    },
+    "agencies": [
+     {
+      "id": 1040,
+      "name": "CAS Space",
+      "abbrev": "CAS",
+      "country": [
+       {
+        "id": 6,
+        "name": "China",
+        "alpha_2_code": "CN",
+        "alpha_3_code": "CHN",
+        "nationality_name": "Chinese",
+        "nationality_name_composed": "Sino"
+       }
+      ]
+     }
+    ]
+   },
+   "webcast_live": false
+  },
+  {
+   "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
+   "name": "Falcon 9 Block 5 | Starlink Group 15-18",
+   "status": {
+    "id": 1,
+    "name": "Go for Launch",
+    "abbrev": "Go",
+    "description": "Current T-0 confirmed by official or reliable sources."
+   },
+   "last_updated": "2026-10-30T14:42:22Z",
+   "net": "2026-10-31T04:02:22Z",
+   "net_precision": {
+    "id": 0,
+    "name": "Second",
+    "abbrev": "SEC",
+    "description": "The T-0 is accurate to the second."
+   },
+   "window_end": "2026-10-31T07:48:00Z",
+   "window_start": "2026-10-31T03:48:00Z",
+   "launch_service_provider": {
+    "response_mode": "list",
+    "id": 121,
+    "url": "https://ll.thespacedevs.com/2.3.0/agencies/121/",
+    "name": "SpaceX",
+    "abbrev": "SpX",
+    "type": {
+     "id": 3,
+     "name": "Commercial"
+    }
+   },
+   "rocket": {
+    "id": 9281,
+    "configuration": {
+     "response_mode": "list",
+     "id": 164,
+     "url": "https://ll.thespacedevs.com/2.3.0/launcher_configurations/164/",
+     "name": "Falcon 9",
+     "families": [
+      {
+       "response_mode": "list",
+       "id": 1,
+       "name": "Falcon"
+      },
+      {
+       "response_mode": "list",
+       "id": 176,
+       "name": "Falcon 9"
+      }
+     ],
+     "full_name": "Falcon 9 Block 5",
+     "variant": "Block 5"
+    }
+   },
+   "mission": {
+    "id": 7880,
+    "name": "Starlink Group 15-18",
+    "type": "Communications",
+    "description": "A batch of 27 satellites for the Starlink mega-constellation - SpaceX's project for space-based Internet communication system.",
+    "orbit": {
+     "id": 8,
+     "name": "Low Earth Orbit",
+     "abbrev": "LEO",
+     "celestial_body": {
+      "response_mode": "list",
+      "id": 1,
+      "name": "Earth"
+     }
+    },
+    "agencies": [
+     {
+      "id": 121,
+      "name": "SpaceX",
+      "abbrev": "SpX",
+      "country": [
+       {
+        "id": 2,
+        "name": "United States of America",
+        "alpha_2_code": "US",
+        "alpha_3_code": "USA",
+        "nationality_name": "American",
+        "nationality_name_composed": "Americano"
+       }
+      ]
+     }
+    ]
+   },
+   "pad": {
+    "id": 16,
+    "name": "Space Launch Complex 4E",
+    "latitude": 34.632,
+    "longitude": -120.611,
+    "country": {
+     "id": 2,
+     "name": "United States of America",
+     "alpha_2_code": "US",
+     "alpha_3_code": "USA",
+     "nationality_name": "American",
+     "nationality_name_composed": "Americano"
+    },
+    "location": {
+     "id": 11,
+     "name": "Vandenberg SFB, CA, USA"
+    },
+    "agencies": []
+   },
+   "webcast_live": false
+  },
+  {
+   "id": "17d0ec68-f466-4916-9dc5-16123eda6484",
+   "name": "GSLV Mk II | GISAT-1A (EOS-05)",
+   "status": {
+    "id": 3,
+    "name": "Launch Successful",
+    "abbrev": "Success",
+    "description": "The launch vehicle successfully inserted its payload(s) into the target orbit(s)."
+   },
+   "last_updated": "2026-09-13T03:41:04Z",
+   "net": "2026-09-03T21:25:00Z",
+   "net_precision": {
+    "id": 0,
+    "name": "Second",
+    "abbrev": "SEC",
+    "description": "The T-0 is accurate to the second."
+   },
+   "window_end": "2026-09-04T01:00:00Z",
+   "window_start": "2026-09-03T21:00:00Z",
+   "launch_service_provider": {
+    "response_mode": "list",
+    "id": 31,
+    "url": "https://ll.thespacedevs.com/2.3.0/agencies/31/",
+    "name": "Indian Space Research Organization",
+    "abbrev": "ISRO",
+    "type": {
+     "id": 1,
+     "name": "Government"
+    }
+   },
+   "rocket": {
+    "id": 2413,
+    "configuration": {
+     "response_mode": "list",
+     "id": 168,
+     "url": "https://ll.thespacedevs.com/2.3.0/launcher_configurations/168/",
+     "name": "GSLV Mk II",
+     "families": [
+      {
+       "response_mode": "list",
+       "id": 84,
+       "name": "GSLV"
+      }
+     ],
+     "full_name": "GSLV Mk. II",
+     "variant": ""
+    }
+   },
+   "mission": {
+    "id": 6523,
+    "name": "GISAT-1A (EOS-05)",
+    "type": "Earth Science",
+    "description": "GISAT-1A (GEO Imaging Satellite) is an Indian earth observing satellite operating from geostationary orbit to facilitate continuous observation of Indian sub-continent, quick monitoring of natural hazards and disaster.\r\n\r\nEOS-05/GISAT-1A will replace EOS-03/GISAT-1 lost in launch failure in 2021.",
+    "orbit": {
+     "id": 2,
+     "name": "Geostationary Transfer Orbit",
+     "abbrev": "GTO",
+     "celestial_body": {
+      "response_mode": "list",
+      "id": 1,
+      "name": "Earth"
+     }
+    },
+    "agencies": [
+     {
+      "id": 31,
+      "name": "Indian Space Research Organization",
+      "abbrev": "ISRO",
+      "country": [
+       {
+        "id": 9,
+        "name": "India",
+        "alpha_2_code": "IN",
+        "alpha_3_code": "IND",
+        "nationality_name": "Indian",
+        "nationality_name_composed": "Indo"
+       }
+      ]
+     }
+    ]
+   },
+   "pad": {
+    "id": 82,
+    "name": "Satish Dhawan Space Centre Second Launch Pad",
+    "latitude": 13.7199,
+    "longitude": 80.2304,
+    "country": {
+     "id": 9,
+     "name": "India",
+     "alpha_2_code": "IN",
+     "alpha_3_code": "IND",
+     "nationality_name": "Indian",
+     "nationality_name_composed": "Indo"
+    },
+    "location": {
+     "id": 14,
+     "name": "Satish Dhawan Space Centre, India"
+    },
+    "agencies": [
+     {
+      "id": 31,
+      "name": "Indian Space Research Organization",
+      "abbrev": "ISRO",
+      "country": [
+       {
+        "id": 9,
+        "name": "India",
+        "alpha_2_code": "IN",
+        "alpha_3_code": "IND",
+        "nationality_name": "Indian",
+        "nationality_name_composed": "Indo"
+       }
+      ]
+     }
+    ]
+   },
+   "webcast_live": false
+  }
+ ]
+}

@@ -1,0 +1,249 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "class",
+   "coord",
+   "operatorLabel",
+   "icao",
+   "inception"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q57178953"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1192604"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(77.131919444 28.59025)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Delhi Cantonment"
+    },
+    "inception": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1914-01-01T00:00:00Z"
+    }
+   },
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q695850"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q3274626"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(77.358911 28.707703)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Hindan Air Force Station"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Western Air Command"
+    },
+    "icao": {
+     "type": "literal",
+     "value": "VIDX"
+    }
+   },
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1324633"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q5972537"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(74.12843333 14.76422222)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INS Kadamba"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Western Naval Command"
+    }
+   },
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q917182"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q3630909"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(73.76527778 18.42222222)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "National Defence Academy"
+    },
+    "inception": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1954-12-07T00:00:00Z"
+    }
+   },
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q695850"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q2673008"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(91.585833333 26.106111111)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Lokpriya Gopinath Bordoloi International Airport"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Indian Air Force"
+    },
+    "icao": {
+     "type": "literal",
+     "value": "VEGT"
+    }
+   },
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q695850"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q2673008"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(91.585833333 26.106111111)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Lokpriya Gopinath Bordoloi International Airport"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Airports Authority of India"
+    },
+    "icao": {
+     "type": "literal",
+     "value": "VEGT"
+    }
+   },
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q111212994"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q5071085"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(76.877 30.724)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Chandimandir Cantonment"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Indian Army"
+    }
+   },
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q245016"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q107675717"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(72.837283 18.931695)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INS Angre"
+    }
+   },
+   {
+    "class": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q245016"
+    },
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q13117117"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(73.8598177 18.7567046)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Sangram Durg"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Bijapur Sultanate"
+    }
+   }
+  ]
+ }
+}

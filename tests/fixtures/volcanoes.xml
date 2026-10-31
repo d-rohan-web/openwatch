@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<rss version="2.0"
+      xmlns:georss="http://www.georss.org/georss"
+      xmlns:atom="https://www.w3.org/2005/Atom">
+	<channel>
+		<title>Smithsonian / USGS Weekly Volcanic Activity Report</title>
+		<link>https://volcano.si.edu/reports_weekly.cfm</link>
+		<description>The Weekly Volcanic Activity Report is a cooperative project between the Smithsonian's Global Volcanism Program and the US Geological Survey's Volcano Hazards Program. Updated by 2300 UTC every Thursday, these notices are preliminary and subject to change as events are studied in more detail. This is not a comprehensive list of eruptions during the week, but rather a summary of activity that meet selected criteria. Carefully reviewed, detailed reports are published in the Bulletin of the Global Volcanism Network.</description>
+		<language>en-us</language>
+		<copyright>Smithsonian Institution</copyright>
+		<managingEditor>kuhns@si.edu (Sally Kuhn Sennert)</managingEditor>
+		<webMaster>gvp@si.edu (Ed Venzke)</webMaster>
+		<atom:link href="https://volcano.si.edu/news/WeeklyVolcanoRSS.xml" rel="self" type="application/rss+xml" />
+		<pubDate>Thu, 15 Oct 2026 03:11:08 -0500</pubDate>
+
+
+
+<item>
+<title>Marapi (Indonesia) - Report for 8 October-14 October 2026 - New Eruptive Activity</title>
+<description>
+&lt;p&gt;The Pusat Vulkanologi dan Mitigasi Bencana Geologi (PVMBG) reported that activity at Marapi (on Sumatra) continued during 8-14 October. An eruptive event was recorded at 0002 on 13 October by the seismic network but not visually observed due to weather conditions. The Alert Level remained at 2 (on a scale of 1-4) and the public was warned to stay 3 km away from the active crater.&lt;/p&gt;
+&lt;p&gt;Source: Pusat Vulkanologi dan Mitigasi Bencana Geologi (PVMBG, also known as CVGHM)&lt;/p&gt;
+</description>
+<link>https://volcano.si.edu/reports_weekly.cfm</link>
+<guid isPermaLink="true">https://volcano.si.edu/reports_weekly.cfm#vn_261140</guid>
+<pubDate>Thu, 15 Oct 2026 03:11:08 -0400</pubDate>
+<georss:point>-0.3800 100.4740</georss:point>
+</item>
+<item>
+<title>Etna (Italy) - Report for 8 October-14 October 2026 - Continuing Eruptive Activity</title>
+<description>
+&lt;p&gt;The Sezione di Catania - Osservatorio Etneo (INGV) reported that eruptive activity at Etna?s summit craters during 5-11 October was characterized by gas emissions at the summit craters and periodic minor ash emissions at Northeast Crater (NEC). Adverse weather conditions often prevented visual observations. The volcano Alert Level remained at Yellow (the second lowest level on a four-level scale) according to the Dipartimento della Protezione Civile.&lt;/p&gt;
+&lt;p&gt;Sources: Dipartimento della Protezione Civile,Sezione di Catania - Osservatorio Etneo (INGV)&lt;/p&gt;
+</description>
+<link>https://volcano.si.edu/reports_weekly.cfm</link>
+<guid isPermaLink="true">https://volcano.si.edu/reports_weekly.cfm#vn_211060</guid>
+<pubDate>Thu, 15 Oct 2026 03:11:08 -0400</pubDate>
+<georss:point>37.7480 14.9990</georss:point>
+</item>
+</channel>
+</rss>

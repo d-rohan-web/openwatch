@@ -1,0 +1,5 @@
+"id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","icao_code","iata_code","gps_code","local_code","home_link","wikipedia_link","keywords"
+35130,"IN-0002","heliport","Tawang Air Force Station",27.588732,91.877439,8756,"AS","IN","IN-AR","Tawang","no",,,,,,,
+3622,"KJFK","large_airport","John F. Kennedy International Airport",40.639447,-73.779317,13,"NA","US","US-NY","New York","yes","KJFK","JFK","KJFK","JFK","https://www.jfkairport.com/","https://en.wikipedia.org/wiki/John_F._Kennedy_International_Airport","Manhattan, New York City, NYC, Idlewild, IDL, KIDL"
+26555,"VIDP","large_airport","Indira Gandhi International Airport",28.55563,77.09519,777,"AS","IN","IN-DL","New Delhi","yes","VIDP","DEL","VIDP",,"https://www.newdelhiairport.in/","https://en.wikipedia.org/wiki/Indira_Gandhi_International_Airport","Palam Air Force Station"
+43966,"IN-0011","small_airport","Jakkur Aerodrome",13.07674,77.597645,3013,"AS","IN","IN-KA","Bengaluru","no","VOJK",,"VOJK",,,"https://en.wikipedia.org/wiki/Jakkur_Aerodrome",

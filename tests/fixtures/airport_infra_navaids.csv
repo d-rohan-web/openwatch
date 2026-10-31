@@ -1,0 +1,5 @@
+"id","filename","ident","name","type","frequency_khz","latitude_deg","longitude_deg","elevation_ft","iso_country","dme_frequency_khz","dme_channel","dme_latitude_deg","dme_longitude_deg","dme_elevation_ft","slaved_variation_deg","magnetic_variation_deg","usageType","power","associated_airport"
+85181,"Ahmedabad_VOR-DME_IN","AAE","Ahmedabad","VOR-DME",113100,23.072200775146484,72.625,184,"IN",113100,"078X",,,,0.011,-0.099,"BOTH","HIGH","VAAH"
+85187,"Amritsar_VOR-DME_IN","AAR","Amritsar","VOR-DME",115500,31.706899642944336,74.80079650878906,752,"IN",115500,"102X",,,,2.011,1.28,"BOTH","HIGH","VIAR"
+85296,"Agra_NDB_IN","AG","Agra","NDB",250,27.15019989013672,77.96530151367188,,"IN",,,,,,,0.218,"BOTH","HIGH","VIAG"
+85050,"Williams_Harbour_NDB_CA","1A","Williams Harbour","NDB",373,52.55889892578125,-55.78219985961914,70,"CA",,,,,,,-23.072,"LO","MEDIUM","CCA6"

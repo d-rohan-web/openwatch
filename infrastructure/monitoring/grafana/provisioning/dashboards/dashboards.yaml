@@ -1,0 +1,3 @@
+apiVersion: 1
+providers:
+  - { name: openwatch, folder: OpenWatch, type: file, options: { path: /var/lib/grafana/dashboards } }

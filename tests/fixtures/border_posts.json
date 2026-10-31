@@ -1,0 +1,116 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "classLabel",
+   "coord",
+   "operatorLabel",
+   "neighbourLabel",
+   "inception"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q67892963"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(74.573854 31.604729)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Attari border border post"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "border checkpoint"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q109927988"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(88.8685097 23.0368214)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Petrapole railway station"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "border train station"
+    },
+    "operatorLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Sealdah railway division"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q547332"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(78.75 31.816666666)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Shipki La"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "border checkpoint"
+    },
+    "neighbourLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "People's Republic of China"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q68035790"
+    },
+    "coord": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(86.287037031 26.600439254)"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "India Nepal border crossing #718"
+    },
+    "classLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "border checkpoint"
+    },
+    "neighbourLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Nepal"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,12 @@
+data-source:
+  - changed-files: [{ any-glob-to-any-file: "apps/collector/feeds/**" }]
+frontend:
+  - changed-files: [{ any-glob-to-any-file: "apps/frontend/**" }]
+api:
+  - changed-files: [{ any-glob-to-any-file: "apps/api/**" }]
+infrastructure:
+  - changed-files: [{ any-glob-to-any-file: ["infrastructure/**", "docker-compose.yaml", "**/Dockerfile"] }]
+docs:
+  - changed-files: [{ any-glob-to-any-file: ["docs/**", "*.md"] }]
+ci:
+  - changed-files: [{ any-glob-to-any-file: ".github/**" }]

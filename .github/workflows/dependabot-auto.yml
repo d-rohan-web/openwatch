@@ -1,0 +1,25 @@
+# Dependabot patch/minor updates: approve and enable auto-merge; they merge only once all required checks pass.
+name: Dependabot auto-approve
+
+on: pull_request_target
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  approve:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - if: steps.meta.outputs.update-type != 'version-update:semver-major'
+        run: |
+          gh pr review --approve "$PR" --body "Patch/minor dependency update: auto-approved, merges when CI passes."
+          gh pr merge --auto --squash "$PR"
+        env:
+          PR: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
