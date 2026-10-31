@@ -135,6 +135,13 @@ services:
     depends_on: [prometheus, loki]
     restart: unless-stopped
 
+# Google Cloud's VPC MTU is 1460; Docker assumes 1500, so large TLS handshakes stall inside containers
+# (ConnectTimeout to some hosts that the VM itself reaches fine). 1460 is safe on any network.
+networks:
+  default:
+    driver_opts:
+      com.docker.network.driver.mtu: "1460"
+
 volumes:
   caddy_data:
   caddy_config:
