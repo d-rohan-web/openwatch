@@ -6,7 +6,7 @@ don't use them. Polled every 5 min; outside 09:15-15:30 IST weekdays fetch serve
 from __future__ import annotations
 
 import time
-from datetime import datetime, time as dtime, timedelta, timezone
+from datetime import datetime, time as dtime, timedelta, timezone, UTC
 
 from apps.collector.feed import Feed
 from packages.contracts.record import record
@@ -44,7 +44,7 @@ def parse(d: dict, now: datetime) -> list[dict]:
         closes = [c for c in (s or {}).get("close") or [] if c is not None]
         if not s or not closes or not s.get("chartPreviousClose"):
             continue
-        as_of = datetime.fromtimestamp(s["timestamp"][-1], timezone.utc)
+        as_of = datetime.fromtimestamp(s["timestamp"][-1], UTC)
         live = market_open(now) and now - as_of < timedelta(minutes=30)
         out.append(ticker(name, float(s.get("fulldayPrice") or closes[-1]), float(s["chartPreviousClose"]),
                           unit="points", currency="INR", as_of=as_of.isoformat(), market_state="open" if live else "closed",
@@ -56,7 +56,7 @@ _cache: dict = {"t": 0.0, "records": []}
 
 
 async def fetch(ctx) -> list[dict]:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if not market_open(now) and _cache["records"] and time.monotonic() - _cache["t"] < CLOSED_EVERY:
         return _cache["records"]
     _cache.update(t=time.monotonic(), records=parse((await ctx.get(URL)).json(), now))

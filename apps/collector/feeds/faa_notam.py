@@ -5,7 +5,7 @@ FAA_NOTAM_KEY is "client_id:client_secret" from api.faa.gov, sent as the documen
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from apps.collector.feed import Feed
 from apps.collector.feeds.restricted_areas import circle
@@ -18,7 +18,7 @@ MILITARY = re.compile(r"\b(FIRING|MISSILE|ROCKET|MIL|MILITARY|DANGER AREA)\b")
 
 
 def _t(s: str | None) -> str | None:
-    return datetime.strptime(s, "%y%m%d%H%M").replace(tzinfo=timezone.utc).isoformat() if s else None
+    return datetime.strptime(s, "%y%m%d%H%M").replace(tzinfo=UTC).isoformat() if s else None
 
 
 def parse_icao(text: str) -> dict:

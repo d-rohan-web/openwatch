@@ -18,6 +18,10 @@ so you can later export a time/area/feed slice for an investigation or a dataset
 - **No keys needed**: most feeds run without any key. Free keys switch on ships, fires, air quality, NOTAMs, road
   traffic and faster OpenSky polling.
 
+> **Notice:** OpenWatch is an independent project for **study and general public awareness only**. It isn't
+> affiliated with any military or government body, uses only public data, and must not be used for military,
+> operational or safety-of-life purposes. See [NOTICE.md](NOTICE.md).
+
 ## Quick start
 
 ```bash

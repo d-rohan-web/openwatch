@@ -38,11 +38,15 @@ def load_feeds() -> list[Feed]:
         if m.name.startswith("_"):
             continue
         f: Feed = importlib.import_module(f"{feeds_pkg.__name__}.{m.name}").FEED
-        assert f.section in SECTIONS, f"{f.id}: section {f.section!r}"
-        assert (f.fetch is None) != (f.stream is None), f"{f.id}: exactly one of fetch/stream"
+        # real checks, not asserts: `python -O` would strip those
+        if f.section not in SECTIONS:
+            raise ValueError(f"{f.id}: section {f.section!r} not in {SECTIONS}")
+        if (f.fetch is None) == (f.stream is None):
+            raise ValueError(f"{f.id}: set exactly one of fetch/stream")
         out.append(f)
     ids = [f.id for f in out]
-    assert len(ids) == len(set(ids)), f"duplicate feed ids: {ids}"
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"duplicate feed ids: {ids}")
     return [f for f in out if not config.FEEDS or f.id in config.FEEDS]
 
 

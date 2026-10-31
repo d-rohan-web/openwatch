@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import io
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 
 import pdfplumber
 
@@ -37,7 +37,7 @@ def parse(text: str, url: str, now: datetime) -> list[dict]:
     bno = re.search(r"BULLETIN NO\.\s*(\d+)", text)
     title = f"{now_pt['category']}" + (f" “{name[1]}”" if name else "")
     for p in track:
-        p["time"] = p["time"].astimezone(timezone.utc).isoformat()
+        p["time"] = p["time"].astimezone(UTC).isoformat()
     geom = {"type": "LineString", "coordinates": [[p["lon"], p["lat"]] for p in track]} if len(track) > 1 else None
     return [record(sys_id[1] if sys_id else url, title=title, kind="cyclone", lon=now_pt["lon"], lat=now_pt["lat"],
                    geometry=geom, observed_at=now_pt["time"], severity=severity(now_pt["category"]),
@@ -54,7 +54,7 @@ async def fetch(ctx) -> list[dict]:
         with pdfplumber.open(io.BytesIO((await ctx.get(url, raw_ext="pdf")).content)) as pdf:
             _cache.clear()
             _cache[url] = "\n".join(p.extract_text() or "" for p in pdf.pages[:3])  # track table is on p1–2
-    return parse(_cache[url], url, datetime.now(timezone.utc))
+    return parse(_cache[url], url, datetime.now(UTC))
 
 
 FEED = Feed(id="imd_cyclone", label="Tropical cyclones (IMD RSMC New Delhi)", section="hazards",

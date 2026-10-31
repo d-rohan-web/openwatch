@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import html
 import re
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from apps.collector.feed import Feed
 from packages.contracts.record import record
@@ -52,7 +52,7 @@ def to_record(item: dict, note: dict, type_: str) -> dict:
 
 async def fetch(ctx) -> list[dict]:
     out = []
-    year = datetime.now(timezone.utc).year
+    year = datetime.now(UTC).year
     for type_, url in LISTS.items():
         items = parse_list((await ctx.get(url.format(year=year))).text)
         if not items:  # early January: the new year's list is still empty

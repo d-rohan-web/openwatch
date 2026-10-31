@@ -20,4 +20,34 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=9.2.0",
+    "ruff>=0.17.3",
 ]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+extend-exclude = ["apps/frontend", "data", ".dev"]
+
+[tool.ruff.lint]
+# pyflakes, pycodestyle, bugbear, bandit (security), blind excepts, pyupgrade
+select = ["E", "F", "B", "S", "BLE", "UP"]
+ignore = [
+  "E501",           # long lines: formatting isn't a bug
+  "E701", "E702",   # compact one-liners are house style
+  "B008",           # FastAPI Query()/Depends() defaults
+  "B905",           # zip() without strict: inputs are equal length by construction
+  "S603", "S607",   # subprocess in dev scripts
+  "S311",           # random isn't used for security
+  "E731",           # small local lambdas are house style
+  "UP031",          # %-formatting keeps SPARQL braces readable
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]   # asserts and fake credentials in tests
+"scripts/**" = ["S310"]                 # one-off build scripts fetch known URLs
+# A broken source must never take the collector down: feeds and the runner catch broadly on purpose.
+"apps/collector/**" = ["BLE001", "S110", "S112"]
+# SQL is assembled from module constants and registry-checked feed ids (archive.FEED_ID); values are bound parameters.
+"packages/common/archive.py" = ["S608"]
+"apps/api/main.py" = ["S608"]
+"tests/test_archive.py" = ["S608"]

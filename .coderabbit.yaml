@@ -1,0 +1,32 @@
+# CodeRabbit AI review (free for open-source repos). Install the app on the repo: https://github.com/apps/coderabbitai
+language: en-US
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!apps/frontend/public/geo/**"
+    - "!tests/fixtures/**"
+    - "!**/*.lock"
+    - "!apps/frontend/package-lock.json"
+  path_instructions:
+    - path: "apps/collector/feeds/**"
+      instructions: |
+        Each file is one public data source. Check: the source is free and public (flag paid/keyed sources);
+        no bypassing of logins, CAPTCHAs, bot walls, IP allow-lists or TLS verification; no spoofed browser
+        User-Agent; polite polling interval; parsing in a pure function with a fixture test; `terms` filled honestly;
+        output only via record(); no secrets or keys in code or URLs that could reach logs.
+    - path: "apps/frontend/**"
+      instructions: |
+        React + MapLibre. Check for API keys in client code, XSS (innerHTML), unbounded per-frame work on large
+        feature sets, missing aria labels on icon-only buttons, and layout regressions on mobile widths.
+    - path: "**/*.py"
+      instructions: |
+        Look for hallucinated APIs/imports, swallowed exceptions outside the collector, asserts used for validation,
+        SQL or paths built from untrusted input, and secrets that could be logged.
+chat:
+  auto_reply: true

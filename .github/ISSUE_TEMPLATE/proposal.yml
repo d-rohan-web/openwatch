@@ -1,0 +1,37 @@
+name: Proposal (required before a pull request)
+description: Describe the problem, your proposed solution and approach. PRs must link an agreed proposal.
+labels: [proposal]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing! Agree the idea here **before** writing code. A maintainer will label it
+        `approved` when it's ready to implement.
+  - type: textarea
+    id: problem
+    attributes: { label: Problem, description: What's missing or wrong, and who it helps. }
+    validations: { required: true }
+  - type: textarea
+    id: solution
+    attributes: { label: Proposed solution, description: What should OpenWatch do instead? }
+    validations: { required: true }
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+      description: How you'd implement it, which files/modules change, and alternatives you considered.
+    validations: { required: true }
+  - type: input
+    id: source
+    attributes: { label: Data source (if any), description: URL, format (API/RSS/page/PDF), update frequency and licence/terms. }
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Rules
+      options:
+        - label: The data source is free (no paid plan or subscription needed)
+          required: true
+        - label: It's public, with no login, CAPTCHA, bot-wall or IP allow-list to get around
+          required: true
+        - label: This is for study / general public awareness, not military or operational use
+          required: true

@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 from apps.collector.feeds.space_weather import alert_records, flare_record, g_scale, kp_record, r_scale
@@ -17,7 +17,7 @@ def test_space_weather():
     assert flare["attrs"]["max_class"] == "B5.7" and flare["severity"] == "info"
 
     alerts = {r["attrs"]["code"] + r["id"][-4:]: r for r in
-              alert_records(FX["alerts"], datetime(2026, 10, 11, 1, tzinfo=timezone.utc))}
+              alert_records(FX["alerts"], datetime(2026, 10, 11, 1, tzinfo=UTC))}
     k7 = alerts["ALTK07-220"]
     assert k7["severity"] == "warning" and k7["attrs"]["scale"] == "G3" and k7["title"].startswith("ALERT: Geomagnetic K-index of 7")
     assert alerts["SUMXM5-328"]["severity"] == "advisory"  # R2

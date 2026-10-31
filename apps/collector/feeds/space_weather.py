@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 
 from apps.collector.feed import Feed
 from packages.contracts.record import record
@@ -47,7 +47,7 @@ def flare_record(rows: list[dict]) -> dict | None:
 
 
 def _t(s: str) -> datetime:
-    return datetime.strptime(s.strip(), "%Y %b %d %H%M UTC").replace(tzinfo=timezone.utc)
+    return datetime.strptime(s.strip(), "%Y %b %d %H%M UTC").replace(tzinfo=UTC)
 
 
 def alert_records(msgs: list[dict], now: datetime) -> list[dict]:
@@ -55,7 +55,7 @@ def alert_records(msgs: list[dict], now: datetime) -> list[dict]:
     out = []
     for m in msgs:
         text = m["message"].replace("\r", "")
-        issued = datetime.fromisoformat(m["issue_datetime"]).replace(tzinfo=timezone.utc)
+        issued = datetime.fromisoformat(m["issue_datetime"]).replace(tzinfo=UTC)
         until = re.search(r"^(?:Valid To|Now Valid Until): (.+)$", text, re.M)
         headline = next((ln.strip() for ln in text.split("\n\n", 1)[-1].split("\n") if ln.strip()), "")
         end = _t(until.group(1)) if until else issued + timedelta(days=3 if "WATCH" in headline else 1)
@@ -79,7 +79,7 @@ async def fetch(ctx) -> list[dict]:
         if r:
             r["raw_sha256"] = ctx.raw_sha  # each from its own response
             out.append(r)
-    return out + alert_records((await ctx.get(SWPC + ALERTS)).json(), datetime.now(timezone.utc))
+    return out + alert_records((await ctx.get(SWPC + ALERTS)).json(), datetime.now(UTC))
 
 
 FEED = Feed(id="space_weather", label="Space weather (NOAA SWPC)", section="space",

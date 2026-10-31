@@ -6,7 +6,7 @@ CAPTCHA, so neither is used. IBJA's home page carries its recent closing rates a
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from selectolax.lexbor import LexborHTMLParser
 
@@ -40,7 +40,7 @@ def parse_brent(d: dict) -> list[dict]:
     price, prev = s.get("fulldayPrice"), s.get("chartPreviousClose")
     if not price or not prev:
         return []
-    as_of = datetime.fromtimestamp(s["timestamp"][-1], timezone.utc).isoformat()
+    as_of = datetime.fromtimestamp(s["timestamp"][-1], UTC).isoformat()
     return [ticker("BRENT", float(price), float(prev), unit="USD/bbl", currency="USD", as_of=as_of, source="Yahoo Finance (ICE Brent futures)")]
 
 

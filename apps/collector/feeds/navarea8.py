@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import io
 import re
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 import pdfplumber
 
@@ -27,7 +27,7 @@ def _deg(d, m, h) -> float:
 
 
 def _dt(day, hh, mm, mon, yy) -> datetime:
-    return datetime(2000 + int(yy), MON[mon], int(day), int(hh), int(mm), tzinfo=timezone.utc)
+    return datetime(2000 + int(yy), MON[mon], int(day), int(hh), int(mm), tzinfo=UTC)
 
 
 def _points(s: str) -> list[list[float]]:
@@ -90,7 +90,7 @@ async def fetch(ctx) -> list[dict]:
     pdf = (await ctx.get(PDF, raw_ext="pdf")).content
     with pdfplumber.open(io.BytesIO(pdf)) as p:
         text = "\n".join(pg.extract_text() or "" for pg in p.pages)
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     # the PDF can lag weeks behind: drop warnings whose own "CANCEL THIS MSG" time has passed
     return [r for r in parse(text) if r["attrs"].get("cancel_at", "9") > now]
 

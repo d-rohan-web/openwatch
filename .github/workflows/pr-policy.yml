@@ -1,0 +1,33 @@
+# Contribution rules: every PR links an issue (problem, solution, approach discussed first) and fills the template.
+name: PR policy
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  issues: read
+  pull-requests: read
+
+jobs:
+  policy:
+    name: Linked issue & template
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR body
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+          n=$(printf '%s' "$BODY" | grep -oiE '(close[sd]?|fix(e[sd])?|resolve[sd]?) #[0-9]+' | head -1 | grep -oE '[0-9]+' || true)
+          [ -n "$n" ] || fail "Link the issue this PR implements, e.g. 'Closes #12'. Open an issue first with the problem, proposed solution and approach."
+          state=$(gh api "repos/$REPO/issues/$n" --jq '.state + " " + (if .pull_request then "pr" else "issue" end)' 2>/dev/null) || fail "#$n doesn't exist."
+          [ "${state#* }" = issue ] || fail "#$n is a pull request, not an issue."
+          for section in "## What & why" "## Approach" "## Checklist"; do
+            printf '%s' "$BODY" | grep -qF "$section" || fail "PR description is missing the '$section' section from the template."
+          done
+          printf '%s' "$BODY" | grep -qiE '\- \[x\] .*no paid' || fail "Confirm the 'No paid source' checklist item (or explain in the PR)."
+          echo "✓ linked to issue #$n, template complete"
