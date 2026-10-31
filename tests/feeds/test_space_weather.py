@@ -23,3 +23,18 @@ def test_space_weather():
     assert alerts["SUMXM5-328"]["severity"] == "advisory"  # R2
     assert alerts["WARK045431"]["severity"] == "info"     # valid until Oct 11 0600
     assert not any(k.startswith("WARK07") for k in alerts)  # expired Oct 10 2359
+
+
+def test_unknown_times_from_swpc_dont_crash():
+    from datetime import UTC, datetime
+
+    from apps.collector.feeds.space_weather import alert_records, flare_record
+    f = flare_record([{"time_tag": "2026-10-31T08:00:00Z", "begin_time": "2026-10-31T07:52:00Z", "max_time": "Unk",
+                       "max_class": "C3.1", "max_xrlong": 3.1e-6}])
+    assert f["observed_at"].startswith("2026-10-31T07:52")
+    now = datetime(2026, 10, 31, 9, tzinfo=UTC)
+    msgs = [{"product_id": "A20F", "issue_datetime": "2026-10-31 08:30:00.000",
+             "message": "Serial Number: 1\r\nValid To: Unk\r\n\r\nALERT: Electron flux\r\n"},
+            {"product_id": "X", "issue_datetime": "Unk", "message": "Serial Number: 2\n\nALERT: x\n"}]
+    out = alert_records(msgs, now)
+    assert len(out) == 1 and out[0]["title"] == "ALERT: Electron flux"
