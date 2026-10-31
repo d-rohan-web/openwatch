@@ -18,5 +18,5 @@ Issues in the upstream data sources themselves should go to their owners. We're 
 ## Self-hosting notes
 
 - Keep `.env` out of version control; it holds your API keys.
-- Put basic auth (`OPENWATCH_AUTH`) or another access layer in front of a public deployment.
+- For a private deployment, add Caddy basic auth (see docs/deploy.md) or another access layer.
 - Bulk export is off by default (`OPENWATCH_EXPORT_ENABLED=false`).
