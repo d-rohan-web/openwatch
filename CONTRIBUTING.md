@@ -44,16 +44,29 @@ cd apps/frontend && npm test && npx tsc --noEmit
    **approach** (files/modules you'll change, alternatives considered, the data source and its licence).
 2. **Wait for agreement.** A maintainer discusses it and labels it `approved`. This saves you from writing code that
    can't be merged.
-3. **Open a pull request** that links the issue (`Closes #12`) and fills every section of the template
+3. **Fork, branch, and push to your fork.** You can't push to this repo directly; work on your own fork:
+   ```bash
+   # on GitHub: click "Fork" on d-rohan-web/openwatch
+   git clone https://github.com/<your-username>/openwatch.git && cd openwatch
+   git remote add upstream https://github.com/d-rohan-web/openwatch.git
+   git checkout -b feat/<short-name>             # one branch per issue
+   # …make your changes, run the checks below…
+   git commit -m "feat: add <source> feed"        # Conventional Commits
+   git push -u origin feat/<short-name>
+   ```
+   Keep your branch current with `git fetch upstream && git rebase upstream/main` (then `git push --force-with-lease`).
+4. **Open a pull request** from your fork's branch to `d-rohan-web/openwatch:main` that links the issue
+   (`Closes #12`) and fills every section of the template
    (What & why, Approach, Checklist). The *PR policy* check rejects PRs without a linked issue or the template.
-4. **Keep to the project's structure and quality**:
+5. **Keep to the project's structure and quality**:
    - one data source = one file in `apps/collector/feeds/`, parsing in a pure function, a fixture test;
    - shared helpers live in `packages/`, the record shape stays flat (`packages/contracts/record.py`);
    - match the surrounding code style; `uv run ruff check .`, `uv run pytest -q`, `npx tsc --noEmit` and `npm test` pass;
    - small, focused PRs with a [Conventional Commits](https://www.conventionalcommits.org/) title (`feat: …`, `fix: …`).
-5. **Review**: the review bot runs first (lint, security patterns, leak scan, AI-code smells such as placeholders,
-   disabled TLS, spoofed user agents, hardcoded keys). Then a maintainer reviews. Code-owner approval and green checks
-   are required to merge.
+6. **Review**: the review bot runs first (lint, security patterns, leak scan, AI-code smells such as placeholders,
+   disabled TLS, spoofed user agents, hardcoded keys), then AI reviewers leave inline comments (Claude on branches in
+   this repo; GitHub withholds secrets from fork PRs, so forks get the bots and a maintainer). A maintainer reviews
+   and merges once all required checks are green.
 
 ### Data source rules
 
