@@ -35,13 +35,26 @@ def kp_record(rows: list[dict]) -> dict:
                   a_running=last.get("a_running"), station_count=last.get("station_count"))
 
 
+def _when(*vals) -> str | None:
+    """First value that is a real timestamp: SWPC writes "Unk" for times it doesn't know yet (flare still rising)."""
+    for v in vals:
+        try:
+            if v:
+                datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+                return v
+        except ValueError:
+            continue
+    return None
+
+
 def flare_record(rows: list[dict]) -> dict | None:
     if not rows:
         return None
     f = rows[-1]
     r = r_scale(f.get("max_xrlong") or 0)
     return record("flare", title=f"X-ray flare {f['max_class']}" + (f" (R{r})" if r else ""), kind="flare",
-                  observed_at=f.get("max_time") or f["time_tag"], severity=severity(r), max_class=f["max_class"],
+                  observed_at=_when(f.get("max_time"), f.get("begin_time"), f.get("time_tag")), severity=severity(r),
+                  max_class=f["max_class"],
                   r_scale=r, begin_time=f.get("begin_time"), max_time=f.get("max_time"), end_time=f.get("end_time"),
                   current_class=f.get("current_class"), max_xrlong=f.get("max_xrlong"), satellite=f.get("satellite"))
 
@@ -55,10 +68,15 @@ def alert_records(msgs: list[dict], now: datetime) -> list[dict]:
     out = []
     for m in msgs:
         text = m["message"].replace("\r", "")
+        if not _when(m.get("issue_datetime")):
+            continue  # no usable issue time: can't tell if it's still in force
         issued = datetime.fromisoformat(m["issue_datetime"]).replace(tzinfo=UTC)
         until = re.search(r"^(?:Valid To|Now Valid Until): (.+)$", text, re.M)
         headline = next((ln.strip() for ln in text.split("\n\n", 1)[-1].split("\n") if ln.strip()), "")
-        end = _t(until.group(1)) if until else issued + timedelta(days=3 if "WATCH" in headline else 1)
+        try:
+            end = _t(until.group(1)) if until else issued + timedelta(days=3 if "WATCH" in headline else 1)
+        except ValueError:  # "Valid To: Unk" and the like: fall back to the default lifetime
+            end = issued + timedelta(days=3 if "WATCH" in headline else 1)
         if end < now:
             continue
         scale = re.search(r"NOAA Scale: ([GSR])(\d)", text, re.I)
