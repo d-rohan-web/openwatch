@@ -30,7 +30,8 @@ docker compose up -d --build
 open https://localhost:39443    # self-signed certificate on first run
 ```
 
-Monitoring (Prometheus, Loki, Alloy, Grafana with a feed dashboard):
+Monitoring: four Grafana dashboards (overview, situation over time, visitors & bandwidth, server health), locally or
+on free Grafana Cloud. See [docs/monitoring.md](docs/monitoring.md).
 
 ```bash
 docker compose --profile monitoring up -d
