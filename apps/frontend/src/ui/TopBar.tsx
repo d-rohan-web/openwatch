@@ -1,4 +1,4 @@
-import { Box, Globe2, MapPinned, Search } from "lucide-react";
+import { Box, Github, Globe2, MapPinned, Search } from "lucide-react";
 import type { Scope } from "../MapView";
 import type { FeedMeta } from "../types";
 import { Mark, STATE } from "./common";
@@ -45,6 +45,10 @@ export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setTh
         <i className="dot" style={{ background: bad ? STATE.DEGRADED.color : STATE.OK.color }} />
         <span className="num">{ok}/{running.length}</span><span>feeds</span>
       </button>
+      <a className="icon-btn gh" href="https://github.com/d-rohan-web/openwatch" target="_blank" rel="noreferrer"
+        title="OpenWatch on GitHub: source, issues, contribute" aria-label="OpenWatch on GitHub">
+        <Github size={17} />
+      </a>
       <div className="clock" aria-label="Time">
         <b className="num">{new Date(now).toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata" })}</b>
         <small>IST · {new Date(now).toISOString().slice(11, 16)}Z</small>
