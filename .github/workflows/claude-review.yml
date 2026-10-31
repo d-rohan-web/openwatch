@@ -22,7 +22,7 @@ jobs:
       HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
     steps:
       - if: env.HAS_KEY != 'true'
-        run: echo "::notice::ANTHROPIC_API_KEY not set (or fork PR): Claude review skipped."
+        run: 'echo "::notice::ANTHROPIC_API_KEY not set (or fork PR), so Claude review is skipped."'
       - if: env.HAS_KEY == 'true'
         uses: actions/checkout@v6
         with: { fetch-depth: 1 }
