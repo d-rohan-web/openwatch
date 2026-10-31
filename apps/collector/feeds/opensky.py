@@ -13,7 +13,7 @@ from packages.common.geo import GLOBAL
 from packages.contracts.record import record
 
 URL = "https://opensky-network.org/api/states/all?extended=1" + ("" if GLOBAL else "&lamin=6&lomin=68&lamax=37.5&lomax=98")
-TOKEN_URL = "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token"
+TOKEN_URL = "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token"  # noqa: S105 (a URL)
 CLIENT_ID, CLIENT_SECRET = os.getenv("OPENSKY_CLIENT_ID", ""), os.getenv("OPENSKY_CLIENT_SECRET", "")
 _token: tuple[str, float] = ("", 0.0)
 

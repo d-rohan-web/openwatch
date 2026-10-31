@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 import websockets
 
@@ -37,7 +37,7 @@ def _txt(s: str | None) -> str | None:
 def _time(meta: dict) -> datetime | None:
     # "2022-12-29 18:22:32.318353 +0000 UTC"
     m = re.match(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", meta.get("time_utc") or "")
-    return datetime.fromisoformat(m[1]).replace(tzinfo=timezone.utc) if m else None
+    return datetime.fromisoformat(m[1]).replace(tzinfo=UTC) if m else None
 
 
 def handle(msg: dict) -> dict | None:

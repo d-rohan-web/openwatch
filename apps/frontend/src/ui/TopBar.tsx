@@ -5,22 +5,22 @@ import { Mark, STATE } from "./common";
 
 type Props = { scope: Scope; setScope: (s: Scope) => void; globalReady: boolean; feeds: FeedMeta[]; now: number;
   threeD: boolean; setThreeD: (v: boolean) => void;
-  lastUpdate: number; openSearch: () => void; openFeeds: () => void };
+  lastUpdate: number; openSearch: () => void; openFeeds: () => void; openNotice: () => void };
 
-export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setThreeD, lastUpdate, openSearch, openFeeds }: Props) {
+export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setThreeD, lastUpdate, openSearch, openFeeds, openNotice }: Props) {
   const running = feeds.filter((f) => f.health?.state !== "NEEDS_KEY");
   const ok = running.filter((f) => f.health?.state === "OK").length;
   const bad = running.filter((f) => f.health?.state === "DOWN" || f.health?.state === "DEGRADED").length;
   const fresh = now - lastUpdate < 30000;
   return (
     <header className="overlay glass topbar">
-      <div className="brand">
+      <button className="brand" onClick={openNotice} title="About OpenWatch: purpose and notice" aria-label="About OpenWatch">
         <Mark />
         <div>
           <div className="brand-name">OpenWatch<sub>India</sub></div>
           <div className="brand-sub">Open-source situational awareness</div>
         </div>
-      </div>
+      </button>
       <span className="divider" />
       <div className="seg" role="radiogroup" aria-label="Coverage">
         <button role="radio" aria-checked={scope === "india"} className={scope === "india" ? "on" : ""} onClick={() => setScope("india")}>

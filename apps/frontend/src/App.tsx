@@ -6,6 +6,7 @@ import type { FeedMeta, Rec } from "./types";
 import { CommandPalette } from "./ui/CommandPalette";
 import { IntelPanel, type Tab } from "./ui/IntelPanel";
 import { LayerDock, type Extra } from "./ui/LayerDock";
+import { Notice } from "./ui/Notice";
 import { StateCard } from "./ui/StateCard";
 import { Stats } from "./ui/Stats";
 import { TopBar } from "./ui/TopBar";
@@ -41,6 +42,8 @@ export function App() {
   const [flyTo, setFlyTo] = useState<{ lon: number; lat: number; zoom?: number; n: number } | null>(null);
   const [bounds, setBounds] = useState<[number, number, number, number] | null>(null);
   const [palette, setPalette] = useState(false);
+  const [seenNotice, setSeenNotice] = useStored("openwatch.notice", false);
+  const [notice, setNotice] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [indiaArea, setIndiaArea] = useState<Area | null>(null);
   const [states, setStates] = useState<GeoArea[]>([]);
@@ -126,7 +129,7 @@ export function App() {
         history={history} flyTo={flyTo} onBounds={setBounds} />
       <TopBar scope={scope} setScope={setScope} globalReady={cfg.global} feeds={feeds} now={now} lastUpdate={lastUpdate}
         threeD={threeD} setThreeD={setThreeD}
-        openSearch={() => setPalette(true)} openFeeds={() => { setTab("feeds"); setCollapsed(false); }} />
+        openSearch={() => setPalette(true)} openFeeds={() => { setTab("feeds"); setCollapsed(false); }} openNotice={() => setNotice(true)} />
       <LayerDock feeds={feeds} live={mapLive} on={on} setOn={setOn} extras={extras} now={now} />
       {stateName && <StateCard name={stateName} records={inState} feeds={feeds} now={now} back={() => setStateName(null)} pick={pick} />}
       <IntelPanel tab={tab} setTab={setTab} collapsed={collapsed} setCollapsed={setCollapsed} feeds={feeds} records={visible} now={now}
@@ -135,6 +138,7 @@ export function App() {
         loadHistory={() => selected && getHistory(selected.feed, selected.id).then(setHistory)}
         satellites={live.satellites ?? []} passFor={(r) => passOver(r, indiaArea, now)} exportEnabled={cfg.export} />
       <Stats live={mapLive} inScope={inScope} ticker={ticker} show={(fs) => setOn([...new Set([...on, ...fs])])} />
+      {(notice || !seenNotice) && <Notice close={() => { setSeenNotice(true); setNotice(false); }} />}
       <CommandPalette open={palette} close={() => setPalette(false)} feeds={feeds} records={allRecs} on={on} toggle={toggle} pick={pick}
         states={states.map((s) => s.name)} pickState={setStateName}
         fly={(lon, lat) => setFlyTo({ lon, lat, zoom: 8.5, n: Date.now() })} />

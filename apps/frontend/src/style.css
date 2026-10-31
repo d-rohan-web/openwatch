@@ -60,7 +60,12 @@ kbd { font: 11px var(--mono); padding: 1px 5px; border-radius: 4px; border: 1px 
 
 /* top bar */
 .topbar { top: 12px; left: 12px; right: 12px; height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 8px 0 14px; }
-.brand { display: flex; align-items: center; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 0; text-align: left; }
+.notice { width: min(520px, calc(100% - 32px)); padding: 18px 20px; background: var(--surface-solid); border-top: 2px solid var(--accent); animation: pop .16s var(--ease); }
+.notice-head { display: flex; align-items: center; gap: 8px; font-size: 15px; margin-bottom: 8px; }
+.notice p { margin: 0 0 8px; color: var(--text-2); }
+.notice ul { margin: 0 0 14px; padding-left: 18px; color: var(--text-2); display: grid; gap: 6px; font-size: 12.5px; }
+.notice-foot { display: flex; align-items: center; justify-content: space-between; }
 .brand-mark { width: 26px; height: 26px; color: var(--accent); }
 .brand-name { font-weight: 700; letter-spacing: .04em; font-size: 15px; line-height: 1; }
 .brand-name sub { font-size: 9.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-left: 3px; vertical-align: -2px; }
