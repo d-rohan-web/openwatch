@@ -1,4 +1,50 @@
-// Ship every openwatch container's stdout (JSON lines) to Loki, with level/logger/feed as labels.
+// One agent for metrics and logs. Endpoints come from the environment:
+//   local (monitoring profile): the compose Prometheus + Loki (defaults below)
+//   server (cloud profile):     Grafana Cloud, credentials from .env (see docs/monitoring.md)
+
+// ---------------------------------------------------------------- metrics
+prometheus.exporter.unix "host" {
+  procfs_path = "/host/proc"
+  sysfs_path  = "/host/sys"
+  rootfs_path = "/rootfs"
+  set_collectors = ["cpu", "meminfo", "loadavg", "filesystem", "netdev", "diskstats", "uname", "time"]
+}
+
+prometheus.scrape "openwatch" {
+  targets = [
+    {"__address__" = "collector:9101", "job" = "collector"},
+    {"__address__" = "api:8000", "job" = "api"},
+  ]
+  scrape_interval = "30s"
+  forward_to      = [prometheus.relabel.instance.receiver]
+}
+
+prometheus.scrape "host" {
+  targets         = prometheus.exporter.unix.host.targets
+  scrape_interval = "60s"
+  forward_to      = [prometheus.relabel.instance.receiver]
+}
+
+prometheus.relabel "instance" {
+  rule {
+    target_label = "instance"
+    replacement  = coalesce(sys.env("OPENWATCH_INSTANCE"), "local")
+  }
+  forward_to = [prometheus.remote_write.out.receiver]
+}
+
+prometheus.remote_write "out" {
+  endpoint {
+    url = coalesce(sys.env("GRAFANA_CLOUD_PROM_URL"), "http://prometheus:9090/api/v1/write")
+    basic_auth {
+      username = coalesce(sys.env("GRAFANA_CLOUD_PROM_USER"), "local")
+      password = coalesce(sys.env("GRAFANA_CLOUD_TOKEN"), "local")
+    }
+  }
+}
+
+// ---------------------------------------------------------------- logs
+// container logs (JSON lines) with service / level / feed labels
 discovery.docker "containers" {
   host = "unix:///var/run/docker.sock"
   filter {
@@ -6,6 +52,7 @@ discovery.docker "containers" {
     values = ["com.docker.compose.project=openwatch"]
   }
 }
+
 discovery.relabel "containers" {
   targets = discovery.docker.containers.targets
   rule {
@@ -13,22 +60,40 @@ discovery.relabel "containers" {
     target_label  = "service"
   }
 }
+
 loki.source.docker "containers" {
   host       = "unix:///var/run/docker.sock"
   targets    = discovery.relabel.containers.output
-  forward_to = [loki.process.json.receiver]
+  forward_to = [loki.process.app.receiver]
 }
-loki.process "json" {
+
+loki.process "app" {
   stage.json {
     expressions = { level = "level", logger = "logger", feed = "feed" }
   }
   stage.labels {
     values = { level = "", logger = "", feed = "" }
   }
-  forward_to = [loki.write.local.receiver]
+  forward_to = [loki.write.out.receiver]
 }
-loki.write "local" {
+
+// web access log written by Caddy on the caddy_data volume (visitors, pages, referrers, bandwidth)
+local.file_match "access" {
+  path_targets = [{"__path__" = "/caddy/access.log", "job" = "access"}]
+}
+
+loki.source.file "access" {
+  targets    = local.file_match.access.targets
+  forward_to = [loki.write.out.receiver]
+}
+
+loki.write "out" {
   endpoint {
-    url = "http://loki:3100/loki/api/v1/push"
+    url = coalesce(sys.env("GRAFANA_CLOUD_LOKI_URL"), "http://loki:3100/loki/api/v1/push")
+    basic_auth {
+      username = coalesce(sys.env("GRAFANA_CLOUD_LOKI_USER"), "local")
+      password = coalesce(sys.env("GRAFANA_CLOUD_TOKEN"), "local")
+    }
   }
+  external_labels = { instance = coalesce(sys.env("OPENWATCH_INSTANCE"), "local") }
 }

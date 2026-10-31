@@ -1,8 +1,3 @@
+# Samples arrive by remote write from Alloy (see alloy/config.alloy), so there is nothing to scrape here.
 global:
   scrape_interval: 30s
-scrape_configs:
-  - job_name: collector
-    static_configs: [{ targets: ["collector:9101"] }]
-  - job_name: api
-    metrics_path: /metrics
-    static_configs: [{ targets: ["api:8000"] }]

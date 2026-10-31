@@ -30,6 +30,9 @@ RECORDS = Counter("openwatch_records_total", "Records received", ["feed"])
 STORED = Counter("openwatch_records_stored_total", "Records written to the archive", ["feed"])
 LIVE = Gauge("openwatch_live_records", "Records in live state", ["feed"])
 LAST_OK = Gauge("openwatch_last_ok_timestamp", "Unix time of the last successful fetch", ["feed"])
+# live records by severity: the situation over time (Grafana "Situation" dashboard)
+LIVE_SEV = Gauge("openwatch_live_severity", "Live records by severity", ["feed", "severity"])
+FAILS = Gauge("openwatch_feed_failing", "1 while a feed's last fetch failed", ["feed"])
 
 
 def load_feeds() -> list[Feed]:
@@ -154,6 +157,9 @@ class Runner:
             for fid in dirty:
                 recs = list(self.state[fid].values())
                 LIVE.labels(fid).set(len(recs))
+                for sev in ("info", "advisory", "warning", "critical"):
+                    LIVE_SEV.labels(fid, sev).set(sum(r.get("severity") == sev for r in recs))
+                FAILS.labels(fid).set(1 if self.health[fid]["state"] in ("DEGRADED", "DOWN") else 0)
                 h = {**self.health[fid], "live_count": len(recs)}
                 pipe.set(live_key(fid), dumps(recs)).set(health_key(fid), dumps(h)).publish(EVENTS, fid)
             try:
