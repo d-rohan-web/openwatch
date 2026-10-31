@@ -61,3 +61,10 @@ def test_query_rejects_unsafe_feed_ids(tmp_path):
     import pytest
     with pytest.raises(ValueError):
         Archive(str(tmp_path)).query(feeds=["x'; DROP TABLE"])
+
+
+def test_usage(tmp_path):
+    a = Archive(str(tmp_path))
+    a.save_raw("f", b"x" * 100, "txt")
+    u = a.usage()
+    assert u["raw"][1] == 1 and u["raw"][0] > 0 and u["records"] == (0, 0)

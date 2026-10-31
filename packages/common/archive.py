@@ -121,6 +121,21 @@ class Archive:
                     removed += 1
         return removed
 
+    def usage(self) -> dict[str, tuple[int, int]]:
+        """{"records"|"raw": (bytes, files)} on disk, for monitoring."""
+        out = {}
+        for kind in ("records", "raw"):
+            size = files = 0
+            for dirpath, _, names in os.walk(os.path.join(self.root, kind)):
+                for n in names:
+                    try:
+                        size += os.path.getsize(os.path.join(dirpath, n))
+                        files += 1
+                    except OSError:
+                        pass  # rotated/compacted away mid-walk
+            out[kind] = (size, files)
+        return out
+
     # ---------- read side (API, export) ----------
     def query(self, feeds: list[str] | None = None, start: datetime | None = None, end: datetime | None = None,
               bbox: tuple[float, float, float, float] | None = None, ids: list[str] | None = None,

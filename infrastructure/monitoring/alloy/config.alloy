@@ -84,6 +84,46 @@ local.file_match "access" {
 
 loki.source.file "access" {
   targets    = local.file_match.access.targets
+  forward_to = [loki.process.access.receiver]
+}
+
+// visitor location (DB-IP Lite, CC BY 4.0) and device, then blank the last IPv4 octet before anything leaves the VM
+loki.process "access" {
+  stage.json {
+    expressions = { ip = "request.remote_ip", ua = "request.headers.\"User-Agent\"[0]" }
+  }
+  stage.geoip {
+    source  = "ip"
+    db      = "/geoip/dbip-city-lite.mmdb"
+    db_type = "city"
+  }
+  stage.regex {
+    source     = "ua"
+    expression = "(?P<os>Windows|Android|iPhone|iPad|Mac OS X|CrOS|Linux)"
+  }
+  stage.regex {
+    source     = "ua"
+    expression = "(?P<browser>Edg|OPR|SamsungBrowser|Firefox|Chrome|Safari|curl|[Bb]ot|python|Go-http)"
+  }
+  stage.regex {
+    source     = "ua"
+    expression = "(?P<mobile>Mobile|Android|iPhone)"
+  }
+  stage.template {
+    source   = "device"
+    template = "{{ if .mobile }}mobile{{ else if .os }}desktop{{ else }}other{{ end }}"
+  }
+  stage.labels {
+    values = { country = "geoip_country_name" }
+  }
+  stage.structured_metadata {
+    values = { city = "geoip_city_name", lat = "geoip_location_latitude", lon = "geoip_location_longitude",
+               os = "os", browser = "browser", device = "device" }
+  }
+  stage.replace {
+    expression = "_ip\":\"\\d+\\.\\d+\\.\\d+\\.(\\d+)\""
+    replace    = "0"
+  }
   forward_to = [loki.write.out.receiver]
 }
 

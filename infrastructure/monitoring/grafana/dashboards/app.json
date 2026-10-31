@@ -1,0 +1,796 @@
+{
+ "uid": "openwatch-app",
+ "title": "OpenWatch · App",
+ "description": "Live viewers, API, live stream, collector and archive",
+ "tags": [
+  "openwatch"
+ ],
+ "schemaVersion": 39,
+ "time": {
+  "from": "now-6h",
+  "to": "now"
+ },
+ "refresh": "1m",
+ "timezone": "browser",
+ "templating": {
+  "list": [
+   {
+    "name": "prom",
+    "label": "Metrics",
+    "type": "datasource",
+    "query": "prometheus",
+    "hide": 0
+   },
+   {
+    "name": "loki",
+    "label": "Logs",
+    "type": "datasource",
+    "query": "loki",
+    "hide": 0
+   },
+   {
+    "name": "instance",
+    "label": "Site",
+    "type": "query",
+    "datasource": {
+     "type": "prometheus",
+     "uid": "${prom}"
+    },
+    "refresh": 2,
+    "includeAll": true,
+    "allValue": ".*",
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "query": {
+     "query": "label_values(openwatch_live_records, instance)",
+     "refId": "v"
+    },
+    "definition": "label_values(openwatch_live_records, instance)"
+   }
+  ]
+ },
+ "panels": [
+  {
+   "type": "stat",
+   "title": "Live viewers now",
+   "description": "Browsers connected to the live stream",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(openwatch_live_viewers{instance=~\"$instance\"})",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "decimals": 0,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#ff9933",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 1,
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "API requests / s",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(rate(openwatch_http_request_seconds_count{instance=~\"$instance\"}[5m]))",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "reqps",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#7fd3ff",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 2,
+   "gridPos": {
+    "x": 4,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "API p95",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "histogram_quantile(0.95, sum by (le) (rate(openwatch_http_request_seconds_bucket{instance=~\"$instance\"}[5m])))",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#7fd3ff",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 3,
+   "gridPos": {
+    "x": 8,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "API 5xx / 5 min",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(increase(openwatch_http_request_seconds_count{status=~\"5..\", instance=~\"$instance\"}[5m])) or vector(0)",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "decimals": 0,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#22d3a6",
+        "value": null
+       },
+       {
+        "color": "#ff4d4f",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 4,
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Live stream out",
+   "description": "Before compression",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(rate(openwatch_stream_bytes_total{instance=~\"$instance\"}[5m]))",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "Bps",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#38bdf8",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 5,
+   "gridPos": {
+    "x": 16,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Archive on disk",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(openwatch_archive_bytes{instance=~\"$instance\"})",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#b69cff",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 6,
+   "gridPos": {
+    "x": 20,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Live viewers",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(openwatch_live_viewers{instance=~\"$instance\"})",
+     "legendFormat": "viewers",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 8,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 7,
+   "gridPos": {
+    "x": 0,
+    "y": 4,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "API requests / s by route",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum by (route) (rate(openwatch_http_request_seconds_count{instance=~\"$instance\"}[5m]))",
+     "legendFormat": "{{route}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "reqps",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 18,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "normal"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 8,
+   "gridPos": {
+    "x": 12,
+    "y": 4,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "API p95 latency by route",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "histogram_quantile(0.95, sum by (le, route) (rate(openwatch_http_request_seconds_bucket{instance=~\"$instance\"}[5m])))",
+     "legendFormat": "{{route}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 8,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 9,
+   "gridPos": {
+    "x": 0,
+    "y": 12,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Live stream bytes / s by feed",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(rate(openwatch_stream_bytes_total{instance=~\"$instance\"}[5m]))",
+     "legendFormat": "bytes/s",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum by (feed) (rate(openwatch_stream_events_total{instance=~\"$instance\"}[5m]))",
+     "legendFormat": "events/s {{feed}}",
+     "refId": "B"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 8,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 10,
+   "gridPos": {
+    "x": 12,
+    "y": 12,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "bargauge",
+   "title": "Slowest feeds (p95 fetch, 1 h)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "topk(12, histogram_quantile(0.95, sum by (feed, le) (rate(openwatch_fetch_seconds_bucket{instance=~\"$instance\"}[1h]))))",
+     "legendFormat": "{{feed}}",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "orientation": "horizontal",
+    "displayMode": "gradient",
+    "showUnfilled": true,
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "values": false
+    },
+    "valueMode": "text"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "color": {
+      "mode": "continuous-BlYlRd"
+     },
+     "displayName": "${__field.labels.feed}"
+    },
+    "overrides": []
+   },
+   "id": 11,
+   "gridPos": {
+    "x": 0,
+    "y": 20,
+    "w": 8,
+    "h": 10
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Archive size",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum by (kind) (openwatch_archive_bytes{instance=~\"$instance\"})",
+     "legendFormat": "{{kind}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 18,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "normal"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 12,
+   "gridPos": {
+    "x": 8,
+    "y": 20,
+    "w": 8,
+    "h": 10
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Process memory",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum by (job) (process_resident_memory_bytes{job=~\"collector|api\", instance=~\"$instance\"})",
+     "legendFormat": "{{job}}",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 8,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 13,
+   "gridPos": {
+    "x": 16,
+    "y": 20,
+    "w": 8,
+    "h": 10
+   }
+  }
+ ],
+ "editable": true,
+ "links": [
+  {
+   "title": "OpenWatch dashboards",
+   "type": "dashboards",
+   "tags": [
+    "openwatch"
+   ],
+   "asDropdown": true
+  }
+ ]
+}

@@ -112,6 +112,15 @@ services:
       - loki:/loki
     restart: unless-stopped
 
+  geoip-init:
+    image: alpine:3.20
+    profiles: ["monitoring", "cloud"]
+    entrypoint: ["/bin/sh", "/fetch.sh"]
+    volumes:
+      - ./infrastructure/monitoring/geoip/fetch.sh:/fetch.sh:ro
+      - geoip:/geoip
+    restart: "no"
+
   # metrics + logs agent. "monitoring" = full local stack; "cloud" = only this agent, shipping to Grafana Cloud
   # (servers: COMPOSE_PROFILES=cloud and the GRAFANA_CLOUD_* values in .env; see docs/monitoring.md)
   alloy:
@@ -130,9 +139,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - caddy_data:/caddy:ro            # Caddy's access log
       - alloy:/var/lib/alloy            # read positions + WAL survive restarts
+      - geoip:/geoip:ro                 # DB-IP Lite city database (visitor locations)
       - /proc:/host/proc:ro             # host metrics (CPU, memory, swap, disk, network)
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+    depends_on:
+      geoip-init: { condition: service_completed_successfully }
     mem_limit: 192m                     # never starve the collector on a 1 GB VM
     restart: unless-stopped
     logging: *logging
@@ -159,6 +171,7 @@ networks:
       com.docker.network.driver.mtu: "1460"
 
 volumes:
+  geoip:
   alloy:
   caddy_data:
   caddy_config:

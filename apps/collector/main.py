@@ -13,7 +13,7 @@ import re
 import time
 
 import redis.asyncio as aioredis
-from prometheus_client import Counter, Gauge, start_http_server
+from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
 from apps.collector import feeds as feeds_pkg
 from apps.collector.feed import SECTIONS, Ctx, Feed, new_client
@@ -33,6 +33,10 @@ LAST_OK = Gauge("openwatch_last_ok_timestamp", "Unix time of the last successful
 # live records by severity: the situation over time (Grafana "Situation" dashboard)
 LIVE_SEV = Gauge("openwatch_live_severity", "Live records by severity", ["feed", "severity"])
 FAILS = Gauge("openwatch_feed_failing", "1 while a feed's last fetch failed", ["feed"])
+FETCH_SECONDS = Histogram("openwatch_fetch_seconds", "Time to fetch and parse one poll of a feed", ["feed"],
+                          buckets=(0.25, 0.5, 1, 2, 5, 10, 20, 30, 60, 120, 300))
+ARCHIVE_BYTES = Gauge("openwatch_archive_bytes", "Archive size on disk", ["kind"])
+ARCHIVE_FILES = Gauge("openwatch_archive_files", "Files in the archive", ["kind"])
 
 
 def load_feeds() -> list[Feed]:
@@ -114,7 +118,9 @@ class Runner:
         while True:
             try:
                 ctx.raw_sha = None
+                t = time.monotonic()
                 records = await f.fetch(ctx)
+                FETCH_SECONDS.labels(f.id).observe(time.monotonic() - t)
                 self.take(f, records, ctx.raw_sha)
                 self.ok(f, len(records))
             except Exception as e:  # a broken source must never take the collector down
@@ -173,6 +179,9 @@ class Runner:
             try:
                 n = await asyncio.to_thread(self.archive.compact)
                 m = await asyncio.to_thread(self.archive.prune, config.RETENTION_DAYS, config.RAW_RETENTION_DAYS)
+                for kind, (size, files) in (await asyncio.to_thread(self.archive.usage)).items():
+                    ARCHIVE_BYTES.labels(kind).set(size)
+                    ARCHIVE_FILES.labels(kind).set(files)
                 if n or m:
                     log.info("housekeeping", extra={"compacted": n, "pruned_dirs": m})
             except Exception:

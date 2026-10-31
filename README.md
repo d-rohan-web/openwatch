@@ -139,7 +139,8 @@ material "not for public use", are not ingested.
 
 The app sets no cookies and uses no third-party analytics or trackers. The server keeps a standard web access log
 (time, page, browser, referrer, IP address) for up to 90 days for operations and visitor counts; IPs are anonymised
-in the stats report. Map tiles load from OpenFreeMap, which sees your IP like any website.
+in the stats report, and the last IPv4 octet is removed before logs are sent to the optional Grafana dashboards
+(visitor locations come from the free DB-IP Lite database, looked up on the server). Map tiles load from OpenFreeMap, which sees your IP like any website.
 
 ## Contributing
 

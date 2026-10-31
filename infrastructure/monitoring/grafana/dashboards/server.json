@@ -1,7 +1,7 @@
 {
  "uid": "openwatch-server",
- "title": "OpenWatch · Server health",
- "description": "The VM: CPU, memory, swap, disk and network",
+ "title": "OpenWatch · Server & cost",
+ "description": "The VM (CPU, memory, swap, disk, network) and an estimate of the Google Cloud bill",
  "tags": [
   "openwatch"
  ],
@@ -52,6 +52,246 @@
   ]
  },
  "panels": [
+  {
+   "type": "stat",
+   "title": "Estimated bill / month",
+   "description": "e2-micro + 30 GB disk free; public IPv4 $0.005/h ≈ $3.65; egress: first 1 GB free, then ≈ $0.12/GB (projected from the last day). Actual: Google Billing export, see docs/monitoring.md",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "3.65 + clamp_min(sum(rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\", instance=~\"$instance\"}[1d])) * 86400 * 30 - 1e9, 0) * 0.12 / 1e9",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "currencyUSD",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#22d3a6",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 1,
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Egress (projected 30 d)",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\", instance=~\"$instance\"}[1d])) * 86400 * 30",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#22d3a6",
+        "value": null
+       },
+       {
+        "color": "#ffd23f",
+        "value": 800000000.0
+       },
+       {
+        "color": "#ff4d4f",
+        "value": 1000000000.0
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 2,
+   "gridPos": {
+    "x": 6,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Egress today",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(increase(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\", instance=~\"$instance\"}[24h]))",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#38bdf8",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 3,
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "Fixed: public IPv4",
+   "description": "Google bills in-use external IPv4 at $0.005/hour",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "vector(3.65)",
+     "legendFormat": "",
+     "refId": "A",
+     "instant": true,
+     "range": false
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "currencyUSD",
+     "decimals": null,
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#94a3b8",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 4,
+   "gridPos": {
+    "x": 18,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   }
+  },
   {
    "type": "stat",
    "title": "CPU",
@@ -110,10 +350,10 @@
     },
     "overrides": []
    },
-   "id": 1,
+   "id": 5,
    "gridPos": {
     "x": 0,
-    "y": 0,
+    "y": 4,
     "w": 6,
     "h": 4
    }
@@ -176,10 +416,10 @@
     },
     "overrides": []
    },
-   "id": 2,
+   "id": 6,
    "gridPos": {
     "x": 6,
-    "y": 0,
+    "y": 4,
     "w": 6,
     "h": 4
    }
@@ -234,10 +474,10 @@
     },
     "overrides": []
    },
-   "id": 3,
+   "id": 7,
    "gridPos": {
     "x": 12,
-    "y": 0,
+    "y": 4,
     "w": 6,
     "h": 4
    }
@@ -300,10 +540,10 @@
     },
     "overrides": []
    },
-   "id": 4,
+   "id": 8,
    "gridPos": {
     "x": 18,
-    "y": 0,
+    "y": 4,
     "w": 6,
     "h": 4
    }
@@ -353,10 +593,10 @@
     },
     "overrides": []
    },
-   "id": 5,
+   "id": 9,
    "gridPos": {
     "x": 0,
-    "y": 4,
+    "y": 8,
     "w": 12,
     "h": 8
    }
@@ -415,10 +655,10 @@
     },
     "overrides": []
    },
-   "id": 6,
+   "id": 10,
    "gridPos": {
     "x": 12,
-    "y": 4,
+    "y": 8,
     "w": 12,
     "h": 8
    }
@@ -477,10 +717,10 @@
     },
     "overrides": []
    },
-   "id": 7,
+   "id": 11,
    "gridPos": {
     "x": 0,
-    "y": 12,
+    "y": 16,
     "w": 12,
     "h": 8
    }
@@ -539,11 +779,64 @@
     },
     "overrides": []
    },
-   "id": 8,
+   "id": 12,
    "gridPos": {
     "x": 12,
-    "y": 12,
+    "y": 16,
     "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Egress per day",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${prom}"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${prom}"
+     },
+     "expr": "sum(increase(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br-.*\", instance=~\"$instance\"}[1d]))",
+     "legendFormat": "bytes out",
+     "refId": "A"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "desc"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes",
+     "custom": {
+      "drawStyle": "bars",
+      "lineWidth": 2,
+      "fillOpacity": 8,
+      "gradientMode": "opacity",
+      "showPoints": "never",
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 13,
+   "gridPos": {
+    "x": 0,
+    "y": 24,
+    "w": 24,
     "h": 8
    }
   }

@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import tempfile
+import time
 import zipfile
 from datetime import datetime, timedelta, UTC
 from typing import Literal
@@ -17,7 +18,7 @@ import httpx
 import redis.asyncio as aioredis
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, Response, StreamingResponse
-from prometheus_client import CONTENT_TYPE_LATEST, Counter, generate_latest
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
 from pydantic import BaseModel, Field
 from starlette.background import BackgroundTask
 
@@ -33,6 +34,22 @@ app = FastAPI(title="OpenWatch", docs_url="/api/docs", openapi_url="/api/openapi
 r = aioredis.from_url(config.REDIS_URL, decode_responses=True)
 archive = Archive(config.DATA_DIR)
 EXPORTS = Counter("openwatch_exports_total", "Exports served", ["format"])
+REQUESTS = Histogram("openwatch_http_request_seconds", "API request duration", ["route", "method", "status"],
+                     buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10))
+VIEWERS = Gauge("openwatch_live_viewers", "Browsers connected to the live stream right now")
+STREAM_BYTES = Counter("openwatch_stream_bytes_total", "Bytes pushed on the live stream (before compression)")
+STREAM_EVENTS = Counter("openwatch_stream_events_total", "Live-stream events pushed", ["feed"])
+
+
+@app.middleware("http")
+async def measure(request: Request, call_next):
+    """Request duration by route template (not raw path, so ids don't explode label cardinality)."""
+    t = time.perf_counter()
+    response = await call_next(request)
+    if request.url.path.startswith("/api/") and request.url.path != "/api/stream":
+        route = getattr(request.scope.get("route"), "path", "unmatched")
+        REQUESTS.labels(route, request.method, str(response.status_code)).observe(time.perf_counter() - t)
+    return response
 MAX_EXPORT_DAYS = int(os.getenv("OPENWATCH_MAX_EXPORT_DAYS", "31"))
 
 
@@ -79,6 +96,7 @@ async def stream(request: Request):
     async def gen():
         ps = r.pubsub()
         await ps.subscribe(EVENTS)
+        VIEWERS.inc()
         try:
             yield "retry: 3000\n\n"
             while not await request.is_disconnected():
@@ -88,8 +106,12 @@ async def stream(request: Request):
                     continue
                 fid = msg["data"]
                 recs, h = await r.mget(live_key(fid), health_key(fid))
-                yield f"event: feed\ndata: {{\"feed\":{json.dumps(fid)},\"records\":{recs or '[]'},\"health\":{h or 'null'}}}\n\n"
+                event = f"event: feed\ndata: {{\"feed\":{json.dumps(fid)},\"records\":{recs or '[]'},\"health\":{h or 'null'}}}\n\n"
+                STREAM_BYTES.inc(len(event))
+                STREAM_EVENTS.labels(fid).inc()
+                yield event
         finally:
+            VIEWERS.dec()
             await ps.unsubscribe(EVENTS)
             await ps.aclose()
     return StreamingResponse(gen(), media_type="text/event-stream",
