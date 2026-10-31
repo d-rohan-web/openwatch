@@ -35,8 +35,8 @@ gcloud compute ssh openwatch --zone us-central1-a --command 'cd /opt/openwatch &
 gcloud compute ssh openwatch --zone us-central1-a      # then: sudo nano /opt/openwatch/.env  (API keys), sudo docker compose up -d
 ```
 
-Visitor stats (live dashboard from the server's own access log: unique visitors, pages, referrers, countries,
-browsers; IPs anonymised, nothing sent to third parties; `q` quits):
+Visitor report (HTML, built from the server's own access log: unique visitors, pages, referrers, countries,
+browsers; IPs anonymised, nothing sent to third parties; downloads to your browser from Cloud Shell):
 
 ```bash
 PROJECT=<your-project-id> bash scripts/deploy/stats.sh
