@@ -39,8 +39,11 @@ Visitor report (HTML, built from the server's own access log: unique visitors, p
 browsers; IPs anonymised, nothing sent to third parties; downloads to your browser from Cloud Shell):
 
 ```bash
-PROJECT=<your-project-id> bash scripts/deploy/stats.sh
+PROJECT=<your-project-id> bash scripts/deploy/stats.sh           # everything kept (up to 90 days)
+PROJECT=<your-project-id> DAYS=7 bash scripts/deploy/stats.sh    # last 7 days
 ```
+The report is a snapshot: run it again for newer days. The access log lives on the `caddy_data` volume
+(`/data/access.log`, rotated at 20 MB, kept 90 days), so it survives restarts and updates.
 
 Remove everything: `gcloud compute instances delete openwatch --zone us-central1-a && gcloud compute addresses delete openwatch-ip --region us-central1 && gcloud compute firewall-rules delete openwatch-web`.
 

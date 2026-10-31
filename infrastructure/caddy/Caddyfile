@@ -4,9 +4,13 @@
 	# compresses JSON and the SSE live stream too (keeps a small server inside its free egress)
 	encode zstd gzip
 
-	# access log (JSON, container stdout, rotated by Docker at 5 × 20 MB): visitor stats via scripts/deploy/stats.sh
+	# access log (JSON) on the persistent caddy_data volume, so visitor history survives container restarts and
+	# updates; rotated at 20 MB, kept 90 days. Visitor report: scripts/deploy/stats.sh
 	log {
-		output stdout
+		output file /data/access.log {
+			roll_size 20MiB
+			roll_keep_for 2160h
+		}
 		format json
 	}
 

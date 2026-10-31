@@ -137,8 +137,8 @@ material "not for public use", are not ingested.
 ## Privacy
 
 The app sets no cookies and uses no third-party analytics or trackers. The server keeps a standard web access log
-(time, page, browser, referrer, IP address) in a rotating Docker log of about 100 MB for operations and visitor
-counts; IPs are anonymised in the stats report. Map tiles load from OpenFreeMap, which sees your IP like any website.
+(time, page, browser, referrer, IP address) for up to 90 days for operations and visitor counts; IPs are anonymised
+in the stats report. Map tiles load from OpenFreeMap, which sees your IP like any website.
 
 ## Contributing
 
