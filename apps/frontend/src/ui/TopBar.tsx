@@ -1,26 +1,26 @@
-import { Box, Globe2, MapPinned, Search } from "lucide-react";
+import { Box, Github, Globe2, MapPinned, Search } from "lucide-react";
 import type { Scope } from "../MapView";
 import type { FeedMeta } from "../types";
 import { Mark, STATE } from "./common";
 
 type Props = { scope: Scope; setScope: (s: Scope) => void; globalReady: boolean; feeds: FeedMeta[]; now: number;
   threeD: boolean; setThreeD: (v: boolean) => void;
-  lastUpdate: number; openSearch: () => void; openFeeds: () => void };
+  lastUpdate: number; openSearch: () => void; openFeeds: () => void; openNotice: () => void };
 
-export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setThreeD, lastUpdate, openSearch, openFeeds }: Props) {
+export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setThreeD, lastUpdate, openSearch, openFeeds, openNotice }: Props) {
   const running = feeds.filter((f) => f.health?.state !== "NEEDS_KEY");
   const ok = running.filter((f) => f.health?.state === "OK").length;
   const bad = running.filter((f) => f.health?.state === "DOWN" || f.health?.state === "DEGRADED").length;
   const fresh = now - lastUpdate < 30000;
   return (
     <header className="overlay glass topbar">
-      <div className="brand">
+      <button className="brand" onClick={openNotice} title="About OpenWatch: purpose and notice" aria-label="About OpenWatch">
         <Mark />
         <div>
           <div className="brand-name">OpenWatch<sub>India</sub></div>
           <div className="brand-sub">Open-source situational awareness</div>
         </div>
-      </div>
+      </button>
       <span className="divider" />
       <div className="seg" role="radiogroup" aria-label="Coverage">
         <button role="radio" aria-checked={scope === "india"} className={scope === "india" ? "on" : ""} onClick={() => setScope("india")}>
@@ -45,6 +45,10 @@ export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setTh
         <i className="dot" style={{ background: bad ? STATE.DEGRADED.color : STATE.OK.color }} />
         <span className="num">{ok}/{running.length}</span><span>feeds</span>
       </button>
+      <a className="gh" href="https://github.com/d-rohan-web/openwatch/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer"
+        title="OpenWatch is open source: add a data source, fix a bug, improve the map">
+        <Github size={15} /><span>Contribute</span>
+      </a>
       <div className="clock" aria-label="Time">
         <b className="num">{new Date(now).toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata" })}</b>
         <small>IST · {new Date(now).toISOString().slice(11, 16)}Z</small>

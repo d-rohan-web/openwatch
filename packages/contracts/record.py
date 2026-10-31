@@ -4,7 +4,7 @@ No ontology: a record is what one source said about one thing at one time. `attr
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from typing import Any
 
 SEVERITIES = ("info", "advisory", "warning", "critical")
@@ -15,7 +15,7 @@ COLUMNS = ("feed", "id", "observed_at", "fetched_at", "lon", "lat", "geometry", 
 
 
 def utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def iso(t: datetime | str | int | float | None) -> str | None:
@@ -23,12 +23,12 @@ def iso(t: datetime | str | int | float | None) -> str | None:
     if t is None or t == "":
         return None
     if isinstance(t, (int, float)):
-        t = datetime.fromtimestamp(t, timezone.utc)
+        t = datetime.fromtimestamp(t, UTC)
     elif isinstance(t, str):
         t = datetime.fromisoformat(t.replace("Z", "+00:00"))
     if t.tzinfo is None:
-        t = t.replace(tzinfo=timezone.utc)
-    return t.astimezone(timezone.utc).isoformat(timespec="seconds")
+        t = t.replace(tzinfo=UTC)
+    return t.astimezone(UTC).isoformat(timespec="seconds")
 
 
 def record(id: Any, *, title: str, kind: str, lon: float | None = None, lat: float | None = None,

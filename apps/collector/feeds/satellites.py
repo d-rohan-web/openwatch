@@ -5,7 +5,7 @@ import json
 import math
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from sgp4 import omm
 from sgp4.api import Satrec, jday
@@ -73,7 +73,7 @@ def subpoint(sat: Satrec, when: datetime) -> tuple[float, float, float] | None:
 def track(sat: Satrec, now: datetime, minutes: int = TRACK_MIN, step: int = TRACK_STEP) -> dict:
     pts = []
     for m in range(0, minutes + 1, step):
-        s = subpoint(sat, datetime.fromtimestamp(now.timestamp() + m * 60, timezone.utc))
+        s = subpoint(sat, datetime.fromtimestamp(now.timestamp() + m * 60, UTC))
         if s:
             lon = s[0]
             if pts:  # unwrap so the line doesn't streak across the map at ±180
@@ -193,7 +193,7 @@ async def fetch(ctx) -> list[dict]:
                 raise  # otherwise keep flying the old elements until the next refresh
     if not _sats:
         raise RuntimeError("no orbital elements yet (CelesTrak unavailable); retrying every 15 min")
-    return positions(_sats, _owners, datetime.now(timezone.utc))
+    return positions(_sats, _owners, datetime.now(UTC))
 
 
 FEED = Feed(id="satellites", label="Satellites (CelesTrak + SGP4)", section="space",

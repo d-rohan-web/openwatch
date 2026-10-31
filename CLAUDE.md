@@ -29,3 +29,12 @@ uv run python -m scripts.sources                   # regenerate the docs/DATA_SO
 - **No ontology**: records stay flat. Don't add typed object graphs; put source fields in `attrs`.
 - **Independence**: this is an independent open-source project. Don't copy code, data or names from other proprietary
   codebases.
+
+## Reviewing pull requests
+
+When reviewing a PR, focus on real defects, not style:
+- bugs and hallucinated APIs or imports; asserts used for validation; swallowed exceptions outside the collector
+- leaks: keys or tokens in code, URLs or log messages; personal data
+- policy: paid or keyed sources without justification; bypassing logins, CAPTCHAs, bot walls, IP allow-lists or TLS;
+  spoofed browser User-Agents; military or targeting use cases (see NOTICE.md)
+- structure: one feed per file, parsing in a pure function with a fixture test, output only via `record()`

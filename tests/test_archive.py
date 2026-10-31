@@ -1,6 +1,6 @@
 """Archive round trip: append → dedupe → query open hour → compact → query Parquet → prune."""
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 
 from packages.common.archive import Archive
 from packages.contracts.record import record, utcnow
@@ -17,8 +17,8 @@ def count(a, **kw):
 
 def test_round_trip(tmp_path):
     a = Archive(str(tmp_path))
-    r1 = stamped(record("a", title="A", kind="k", lon=77, lat=28, observed_at=datetime.now(timezone.utc), x=1))
-    r2 = stamped(record("b", title="B", kind="k", observed_at=datetime.now(timezone.utc)))
+    r1 = stamped(record("a", title="A", kind="k", lon=77, lat=28, observed_at=datetime.now(UTC), x=1))
+    r2 = stamped(record("b", title="B", kind="k", observed_at=datetime.now(UTC)))
     assert a.append("f", [r1, r2], store_all=False) == 2
     assert a.append("f", [r1], store_all=False) == 0          # unchanged → not stored again
     assert a.append("f", [{**r1, "attrs": {"x": 2}}], store_all=False) == 1
@@ -26,7 +26,7 @@ def test_round_trip(tmp_path):
     assert count(a, feeds=["f"], bbox=(70, 20, 80, 30)) == 2  # unlocated b drops out
     assert count(a, feeds=["f"], ids=["b"]) == 1
 
-    assert a.compact(now=datetime.now(timezone.utc) + timedelta(hours=1)) == 1  # the hour is now closed
+    assert a.compact(now=datetime.now(UTC) + timedelta(hours=1)) == 1  # the hour is now closed
     assert not any(p.endswith(".jsonl") for _, _, fs in os.walk(tmp_path) for p in fs)
     assert count(a, feeds=["f"]) == 3
     con, sql, params = a.query(feeds=["f"], ids=["a"])
@@ -55,3 +55,9 @@ def test_redact(monkeypatch):
     f = Feed(id="x", label="x", section="air", homepage="", terms="", key="X_KEY", fetch=lambda c: None)
     out = redact("HTTPStatusError: 403 for url 'https://h/api/abcdef123456/y?key=zzz&a=1'", [f])
     assert "abcdef123456" not in out and "zzz" not in out and "a=1" in out
+
+
+def test_query_rejects_unsafe_feed_ids(tmp_path):
+    import pytest
+    with pytest.raises(ValueError):
+        Archive(str(tmp_path)).query(feeds=["x'; DROP TABLE"])

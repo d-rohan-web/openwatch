@@ -49,7 +49,12 @@ gh api -X "$method" "$path" --silent --input - <<'JSON'
           { "context": "Frontend types, tests, build" },
           { "context": "Docker images build" },
           { "context": "No secrets committed" },
-          { "context": "Conventional PR title" }
+          { "context": "Conventional PR title" },
+          { "context": "Linked issue & template" },
+          { "context": "Lint (ruff)" },
+          { "context": "Review checks (AI smells, policy)" },
+          { "context": "Security scan (Semgrep)" },
+          { "context": "Leak scan (TruffleHog)" }
         ] } }
   ]
 }

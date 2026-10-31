@@ -4,7 +4,7 @@ from __future__ import annotations
 import csv
 import io
 import zipfile
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 from urllib.parse import urlsplit
 
 from apps.collector.feed import Feed
@@ -58,7 +58,7 @@ def parse(tsv: str) -> list[dict]:
 
 async def fetch(ctx) -> list[dict]:
     latest = (await ctx.get(LAST, raw_ext="txt")).text.split("\n")[0].rsplit("/", 1)[1][:14]
-    t0 = datetime.strptime(latest, "%Y%m%d%H%M%S").replace(tzinfo=timezone.utc)
+    t0 = datetime.strptime(latest, "%Y%m%d%H%M%S").replace(tzinfo=UTC)
     wanted = [(t0 - timedelta(minutes=15 * i)).strftime("%Y%m%d%H%M%S") for i in range(4)]  # last hour
     for ts in wanted:
         if ts not in _files:

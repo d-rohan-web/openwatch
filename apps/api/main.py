@@ -10,7 +10,7 @@ import logging
 import os
 import tempfile
 import zipfile
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 from typing import Literal
 
 import httpx
@@ -106,10 +106,11 @@ def _bbox(s: str | None):
         return None
     try:
         b = tuple(float(x) for x in s.split(","))
-        assert len(b) == 4 and b[0] < b[2] and b[1] < b[3]
-        return b
-    except (ValueError, AssertionError):
+    except ValueError:
+        b = ()
+    if len(b) != 4 or not (b[0] < b[2] and b[1] < b[3]):
         raise HTTPException(400, "bbox = lon_min,lat_min,lon_max,lat_max")
+    return b
 
 
 def _rows(con, sql, params) -> list[dict]:
@@ -128,7 +129,7 @@ def _rows(con, sql, params) -> list[dict]:
 async def history(feed: str, id: str, hours: float = Query(6, gt=0, le=24 * 7)):
     """Every stored version of one record: an aircraft's track, an alert's updates."""
     await known([feed])
-    start = datetime.now(timezone.utc) - timedelta(hours=hours)
+    start = datetime.now(UTC) - timedelta(hours=hours)
     con, sql, params = archive.query([feed], start=start, ids=[id], limit=20000)
     try:
         return {"feed": feed, "id": id, "records": await asyncio.to_thread(_rows, con, sql, params)}
@@ -187,7 +188,7 @@ async def export(q: ExportReq):
     await asyncio.to_thread(_build_export, q, bbox, metas, tmp, zpath)
     EXPORTS.labels(q.format).inc()
     log.info("export", extra={"feeds": q.feeds, "start": q.start, "end": q.end, "bbox": bbox, "format": q.format})
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     return FileResponse(zpath, filename=f"openwatch-export-{stamp}.zip", media_type="application/zip",
                         background=BackgroundTask(_rmtree, tmp))
 

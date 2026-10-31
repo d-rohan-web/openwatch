@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 from sgp4.api import jday
@@ -8,7 +8,7 @@ from sgp4.propagation import gstime
 from apps.collector.feeds.satellites import gmst, load, positions, subpoint
 
 FX = json.loads((Path(__file__).parent.parent / "fixtures" / "satellites.json").read_text())
-NOW = datetime.fromtimestamp(1793395723, timezone.utc)  # 2026-10-31 02:48:43Z
+NOW = datetime.fromtimestamp(1793395723, UTC)  # 2026-10-31 02:48:43Z
 
 
 def test_satellites():

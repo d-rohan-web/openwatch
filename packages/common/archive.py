@@ -11,18 +11,20 @@ from __future__ import annotations
 
 import glob
 import gzip
+import re
 import hashlib
 import json
 import logging
 import os
 import shutil
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 
 import duckdb
 
 from packages.contracts.record import COLUMNS
 
 log = logging.getLogger(__name__)
+FEED_ID = re.compile(r"[a-z0-9_]{1,40}")
 
 # Explicit schema for reading JSONL so an empty or odd file can't change column types.
 _JSON_COLUMNS = {"feed": "VARCHAR", "id": "VARCHAR", "observed_at": "VARCHAR", "fetched_at": "VARCHAR",
@@ -44,7 +46,7 @@ class Archive:
     # ---------- write side (collector) ----------
     def save_raw(self, feed: str, body: bytes, ext: str) -> str:
         sha = hashlib.sha256(body).hexdigest()
-        path = os.path.join(self.root, "raw", feed, f"{datetime.now(timezone.utc):%Y-%m-%d}", f"{sha}.{ext}.gz")
+        path = os.path.join(self.root, "raw", feed, f"{datetime.now(UTC):%Y-%m-%d}", f"{sha}.{ext}.gz")
         if not os.path.exists(path):
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with gzip.open(path + ".tmp", "wb") as f:
@@ -64,8 +66,9 @@ class Archive:
         rows = []
         for r in records:
             if not store_all:
-                h = hashlib.sha1(json.dumps([r["title"], r["severity"], r["lon"], r["lat"], r["geometry"], r["attrs"]],
-                                            sort_keys=True, default=str).encode()).hexdigest()
+                body = json.dumps([r["title"], r["severity"], r["lon"], r["lat"], r["geometry"], r["attrs"]],
+                                  sort_keys=True, default=str).encode()
+                h = hashlib.sha1(body, usedforsecurity=False).hexdigest()  # change detection, not security
                 if self._last.get((feed, r["id"])) == h:
                     continue
                 self._last[(feed, r["id"])] = h
@@ -75,7 +78,7 @@ class Archive:
             row["attrs"] = json.dumps(r.get("attrs") or {}, ensure_ascii=False, default=str)
             rows.append(json.dumps(row, ensure_ascii=False, default=str))
         if rows:
-            path = _hour_path(self.root, feed, datetime.now(timezone.utc)) + ".jsonl"
+            path = _hour_path(self.root, feed, datetime.now(UTC)) + ".jsonl"
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "a", encoding="utf-8") as f:
                 f.write("\n".join(rows) + "\n")
@@ -83,7 +86,7 @@ class Archive:
 
     def compact(self, now: datetime | None = None) -> int:
         """Turn every closed hour's JSONL into Parquet. Safe to run repeatedly; returns files compacted."""
-        current = _hour_path(self.root, "x", now or datetime.now(timezone.utc))[-len("date=YYYY-MM-DD/hour=HH"):]
+        current = _hour_path(self.root, "x", now or datetime.now(UTC))[-len("date=YYYY-MM-DD/hour=HH"):]
         done = 0
         for path in glob.glob(os.path.join(self.root, "records", "feed=*", "date=*", "hour=*.jsonl")):
             if path[:-len(".jsonl")].endswith(current):
@@ -105,7 +108,7 @@ class Archive:
 
     def prune(self, retention_days: int, raw_retention_days: int, now: datetime | None = None) -> int:
         """Delete whole days older than the retention (0 = keep forever). Returns directories removed."""
-        now = now or datetime.now(timezone.utc)
+        now = now or datetime.now(UTC)
         removed = 0
         for days, pattern, prefix in ((retention_days, ("records", "feed=*", "date=*"), "date="),
                                       (raw_retention_days, ("raw", "*", "*"), "")):
@@ -129,6 +132,9 @@ class Archive:
         time_field "observed": when the source says it happened (falls back to fetched_at when missing).
         """
         sources = []
+        for f in feeds or []:
+            if not FEED_ID.fullmatch(f):  # ids are interpolated into file globs/SQL: never accept anything else
+                raise ValueError(f"bad feed id {f!r}")
         for f in feeds or ["*"]:
             base = os.path.join(self.root, "records", f"feed={f}")
             if glob.glob(os.path.join(base, "date=*", "*.parquet")):

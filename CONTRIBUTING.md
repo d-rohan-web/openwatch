@@ -2,6 +2,12 @@
 
 Thanks for helping. OpenWatch is a live, open-source situational-awareness map of India built only on public data.
 
+## Purpose
+
+OpenWatch is for **study, research and general public awareness**. It isn't affiliated with or built for any
+military, defence or government body, and contributions aimed at military or operational use won't be accepted.
+See [NOTICE.md](NOTICE.md).
+
 ## Ground rules
 
 - **Public sources only.** Never work around logins, CAPTCHAs, IP allow-lists, bot walls (403s) or TLS verification,
@@ -32,12 +38,28 @@ cd apps/frontend && npm test && npx tsc --noEmit
 4. Regenerate the sources table: `uv run python -m scripts.sources` → `docs/DATA_SOURCES.md`.
 5. Poll politely: minutes, not seconds, for government servers.
 
-## Pull requests
+## How to contribute: issue first, then a pull request
 
-- Branch from `main`, keep PRs focused, and use a [Conventional Commits](https://www.conventionalcommits.org/) title
-  (`feat: …`, `fix: …`, `docs: …`). A bot checks it.
-- CI must pass (backend tests, frontend types/tests/build, Docker build). A maintainer review is required to merge.
-- UI changes: include a screenshot.
+1. **Open a proposal issue** (template "Proposal") describing the **problem**, your **proposed solution** and your
+   **approach** (files/modules you'll change, alternatives considered, the data source and its licence).
+2. **Wait for agreement.** A maintainer discusses it and labels it `approved`. This saves you from writing code that
+   can't be merged.
+3. **Open a pull request** that links the issue (`Closes #12`) and fills every section of the template
+   (What & why, Approach, Checklist). The *PR policy* check rejects PRs without a linked issue or the template.
+4. **Keep to the project's structure and quality**:
+   - one data source = one file in `apps/collector/feeds/`, parsing in a pure function, a fixture test;
+   - shared helpers live in `packages/`, the record shape stays flat (`packages/contracts/record.py`);
+   - match the surrounding code style; `uv run ruff check .`, `uv run pytest -q`, `npx tsc --noEmit` and `npm test` pass;
+   - small, focused PRs with a [Conventional Commits](https://www.conventionalcommits.org/) title (`feat: …`, `fix: …`).
+5. **Review**: the review bot runs first (lint, security patterns, leak scan, AI-code smells such as placeholders,
+   disabled TLS, spoofed user agents, hardcoded keys). Then a maintainer reviews. Code-owner approval and green checks
+   are required to merge.
+
+### Data source rules
+
+- **No paid sources.** Data must be free to access. A *free* API key is acceptable only when no keyless source
+  exists; explain why in the PR.
+- Public data only, reached honestly (see Ground rules above).
 
 ## Reporting issues
 

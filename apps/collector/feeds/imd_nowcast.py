@@ -4,7 +4,7 @@ The documented api/nowcast_district_api.php is IP-whitelisted; this is the publi
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 
 from apps.collector.feed import Feed
 from packages.common.geo import district
@@ -51,7 +51,7 @@ def parse(d: dict, now: datetime) -> list[dict]:
 
 
 async def fetch(ctx) -> list[dict]:
-    return parse((await ctx.get(URL)).json(), datetime.now(timezone.utc))
+    return parse((await ctx.get(URL)).json(), datetime.now(UTC))
 
 
 FEED = Feed(id="imd_nowcast", label="Nowcast by district (IMD)", section="hazards",

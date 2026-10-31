@@ -10,7 +10,7 @@ import os
 import ssl
 import time
 from dataclasses import dataclass, field
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 from urllib.parse import urlsplit
 
 import certifi
@@ -29,8 +29,8 @@ class Feed:
     homepage: str           # human page for the source
     terms: str              # licence / terms, shown in the UI and written into exports
     every: float = 300      # seconds between polls
-    fetch: Callable[["Ctx"], Awaitable[list[dict]]] | None = None
-    stream: Callable[["Ctx", Callable[[list[dict]], None]], Awaitable[None]] | None = None
+    fetch: Callable[[Ctx], Awaitable[list[dict]]] | None = None
+    stream: Callable[[Ctx, Callable[[list[dict]], None]], Awaitable[None]] | None = None
     key: str | None = None  # env var that must be set, else the feed stays off as NEEDS_KEY
     snapshot: bool = True   # each fetch is the full current set; False: merge and expire after `ttl`
     ttl: float = 0          # non-snapshot feeds: drop a live record not seen for this many seconds

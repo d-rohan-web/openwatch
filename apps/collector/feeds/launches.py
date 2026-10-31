@@ -1,7 +1,7 @@
 """Upcoming and recent orbital launches from Launch Library 2: Indian sites/agencies and any pad in the region."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from apps.collector.feed import Feed
 from packages.common.geo import in_bbox
@@ -53,7 +53,7 @@ async def fetch(ctx) -> list[dict]:
             if L["id"] not in seen:  # a just-flown launch can sit in both lists
                 seen.add(L["id"])
                 results.append(L)
-    return parse(results, datetime.now(timezone.utc))
+    return parse(results, datetime.now(UTC))
 
 
 FEED = Feed(id="launches", label="Launches (Launch Library 2)", section="space",
