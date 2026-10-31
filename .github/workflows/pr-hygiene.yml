@@ -21,4 +21,4 @@ jobs:
     name: Label by area
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/labeler@v5
+      - uses: actions/labeler@v7
