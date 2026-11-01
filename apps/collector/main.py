@@ -67,6 +67,12 @@ def redact(msg: str, feeds: list[Feed]) -> str:
     return re.sub(r"(?i)((?:api_?)?key|token|secret|password)=[^&\s'\"]+", r"\1=***", msg)
 
 
+
+def next_poll(every: float, fails: int) -> float:
+    """Seconds until the next poll. A failing feed retries after 1, 2, 4… minutes (at most hourly), not after its
+    normal interval: a weekly feed that hit a timeout on startup would otherwise sit empty for two weeks."""
+    return min(60 * 2 ** (fails - 1), 3600) if fails else every
+
 class Runner:
     def __init__(self, feeds: list[Feed], archive: Archive, r: aioredis.Redis):
         self.feeds, self.archive, self.r = feeds, archive, r
@@ -125,8 +131,7 @@ class Runner:
                 self.ok(f, len(records))
             except Exception as e:  # a broken source must never take the collector down
                 self.fail(f, e)
-            fails = self.health[f.id]["fails"]
-            await asyncio.sleep(f.every * min(2 ** fails, 8))  # back off up to 8x while failing
+            await asyncio.sleep(next_poll(f.every, self.health[f.id]["fails"]))
 
     async def streamer(self, f: Feed, client) -> None:
         ctx = Ctx(f, client, lambda body, ext: self.archive.save_raw(f.id, body, ext))
