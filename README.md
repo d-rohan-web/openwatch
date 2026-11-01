@@ -62,6 +62,9 @@ The map also offers:
 - **States**: click a state to fly there and get a live summary card.
 - **Less clutter**: district-level warnings (IMD, SACHET) shade their districts by severity instead of drawing dots;
   dense static layers cluster into count bubbles until you zoom in; every point type has its own icon.
+- **Globe**: spin the whole Earth; every country is outlined and named, India stays highlighted.
+- **Day / Night**: NASA Blue Marble imagery (public domain) or the dark map.
+- **Time window**: Now / 6h / 12h / 24h adds alerts and events from the archive, drawn faded.
 - **3D**: terrain, tilt and rotate, and buildings when zoomed in.
 - **Search (⌘K)**: states, districts, callsigns, airports, alerts and layers.
 

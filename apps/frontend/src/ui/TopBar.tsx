@@ -1,13 +1,13 @@
-import { Box, Github, Globe2, MapPinned, Search } from "lucide-react";
+import { Box, Github, Globe2, MapPinned, Moon, Search, Sun } from "lucide-react";
 import type { Scope } from "../MapView";
 import type { FeedMeta } from "../types";
 import { Mark, STATE } from "./common";
 
 type Props = { scope: Scope; setScope: (s: Scope) => void; globalReady: boolean; feeds: FeedMeta[]; now: number;
-  threeD: boolean; setThreeD: (v: boolean) => void;
+  threeD: boolean; setThreeD: (v: boolean) => void; day: boolean; setDay: (v: boolean) => void; windowH: number; setWindowH: (h: number) => void;
   lastUpdate: number; openSearch: () => void; openFeeds: () => void; openNotice: () => void };
 
-export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setThreeD, lastUpdate, openSearch, openFeeds, openNotice }: Props) {
+export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setThreeD, day, setDay, windowH, setWindowH, lastUpdate, openSearch, openFeeds, openNotice }: Props) {
   const running = feeds.filter((f) => f.health?.state !== "NEEDS_KEY");
   const ok = running.filter((f) => f.health?.state === "OK").length;
   const bad = running.filter((f) => f.health?.state === "DOWN" || f.health?.state === "DEGRADED").length;
@@ -35,8 +35,19 @@ export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setTh
         title={threeD ? "Back to flat 2D map" : "3D: terrain, tilt (right-drag to rotate), buildings when zoomed in"}>
         <Box size={13} /> {threeD ? "3D" : "2D"}
       </button>
+      <button className={`view-btn ${day ? "on" : ""}`} onClick={() => setDay(!day)} aria-pressed={day}
+        title={day ? "Night: dark map" : "Day: NASA Blue Marble imagery"}>
+        {day ? <Sun size={13} /> : <Moon size={13} />} {day ? "Day" : "Night"}
+      </button>
+      <div className="seg" role="radiogroup" aria-label="Time window" title="Also show alerts and events from the archive (faded)">
+        {[0, 6, 12, 24].map((h) => (
+          <button key={h} role="radio" aria-checked={windowH === h} className={windowH === h ? "on" : ""} onClick={() => setWindowH(h)}>
+            {h ? `${h}h` : "Now"}
+          </button>
+        ))}
+      </div>
       <button className="search-trigger" onClick={openSearch} aria-label="Search">
-        <Search size={15} /><span className="grow">Search layers, callsigns, places, alerts…</span><kbd>⌘K</kbd>
+        <Search size={15} /><span className="grow">Search places, callsigns, alerts…</span><kbd>⌘K</kbd>
       </button>
       <span className="live" style={{ color: fresh ? "var(--live)" : "var(--muted)" }} title={fresh ? "Receiving updates" : "No update in 30 s"}>
         <i className="pulse" /> {fresh ? "LIVE" : "IDLE"}

@@ -9,10 +9,10 @@ import os
 import time
 
 from apps.collector.feed import Feed
-from packages.common.geo import GLOBAL
+from packages.common.geo import GLOBAL, REGION_BBOX
 from packages.contracts.record import record
 
-URL = "https://opensky-network.org/api/states/all?extended=1" + ("" if GLOBAL else "&lamin=6&lomin=68&lamax=37.5&lomax=98")
+URL = "https://opensky-network.org/api/states/all?extended=1" + ("" if GLOBAL else "&lamin={1}&lomin={0}&lamax={3}&lomax={2}".format(*REGION_BBOX))
 TOKEN_URL = "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token"  # noqa: S105 (a URL)
 CLIENT_ID, CLIENT_SECRET = os.getenv("OPENSKY_CLIENT_ID", ""), os.getenv("OPENSKY_CLIENT_SECRET", "")
 _token: tuple[str, float] = ("", 0.0)

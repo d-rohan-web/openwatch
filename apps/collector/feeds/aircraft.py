@@ -8,9 +8,9 @@ from apps.collector.feed import Feed
 from packages.common.geo import GLOBAL
 from packages.contracts.record import record
 
-# 250 nm circles on a ~6° grid cover India, the Bay of Bengal and the Arabian Sea approaches.
-TILES = [(lat, lon) for lat in (9, 15, 21, 27, 33) for lon in (71, 77, 83, 89, 95)]
-# adsb.fi allows ~1 request/s, so one sweep takes ~25 s. (adsb.lol rate-limits tile sweeps and adds little here.)
+# 250 nm circles on a ~6° grid cover India, the Arabian Sea, the Bay of Bengal and the Indian Ocean down to the equator.
+TILES = [(lat, lon) for lat in (-3, 3, 9, 15, 21, 27, 33) for lon in (59, 65, 71, 77, 83, 89, 95)]
+# adsb.fi allows ~1 request/s, so one sweep takes ~50 s (inside the 120 s ttl). (adsb.lol rate-limits tile sweeps and adds little here.)
 SOURCES = {"adsb.fi": "https://opendata.adsb.fi/api/v2/lat/{lat}/lon/{lon}/dist/250"}
 MILITARY_WORLD = "https://opendata.adsb.fi/api/v2/mil"  # global scope: every military-flagged aircraft adsb.fi sees
 

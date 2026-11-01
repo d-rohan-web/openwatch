@@ -1,5 +1,5 @@
-// The map: one GeoJSON source per feed over a retinted dark basemap. India scope locks the view to India and dims
-// everything outside the official outline (Survey of India, via datameet); the basemap's own borders are hidden and
+// The map: one GeoJSON source per feed over a retinted dark basemap, drawn as a globe you can spin freely. India scope
+// dims everything outside the official outline (Survey of India, via datameet); the basemap's own borders are hidden and
 // replaced by our border layers. States are clickable; 3D adds terrain, tilt and buildings.
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import * as lucide from "lucide";
 import { alongTrack, FEED_ICON, feedColor, GLYPHS, inArea, inScope, MOVING_FEEDS, toFeatures, trackStep, type Area } from "./features";
 import { SEVERITY_RANK } from "./types";
-import { INDIA_BOUNDS, INDIA_FIT } from "./sections";
+import { INDIA_FIT } from "./sections";
 import type { FeedMeta, Rec } from "./types";
 
 const STYLE = "https://tiles.openfreemap.org/styles/dark";
@@ -21,7 +21,7 @@ const FONT = ["Noto Sans Regular"];
 
 type Props = {
   live: Record<string, Rec[]>; feeds: FeedMeta[]; on: Set<string>; traffic: boolean; scope: Scope; area: Area | null;
-  overlays: Overlays; threeD: boolean; panelOpen: boolean; state: string | null; onState: (name: string | null) => void;
+  overlays: Overlays; threeD: boolean; day: boolean; panelOpen: boolean; state: string | null; onState: (name: string | null) => void;
   select: (feed: string, id: string) => void; selected: { feed: string; id: string } | null; history: Rec[];
   flyTo: { lon: number; lat: number; zoom?: number; n: number } | null;
   onBounds: (b: [number, number, number, number]) => void;
@@ -84,7 +84,7 @@ async function glyphImage(name: string): Promise<ImageData | null> {
   return g.getImageData(0, 0, 48, 48);
 }
 
-const LAYERS = ["fill", "line", "glow", "circle", "glyph", "icon", "cluster", "count"] as const;
+const LAYERS = ["fill", "line", "ripple", "glow", "circle", "glyph", "icon", "cluster", "count"] as const;
 // District-level alert feeds are drawn as shaded districts (max severity), not as hundreds of centroid dots.
 export const DISTRICT_FEEDS = new Set(["imd_warnings", "imd_nowcast", "sachet"]);
 // Dense, static point layers merge into count bubbles when zoomed out.
@@ -92,6 +92,8 @@ const CLUSTER = new Set(["navarea8", "airports", "airport_infra", "defence_sites
   "incois", "city_weather", "cwc_rivers", "launches", "ioda", "cpcb_aqi", "firms", "road_incidents", "volcanoes"]);
 const NOT_CLUSTER = ["!", ["has", "point_count"]] as any;
 const MINOR = ["boolean", ["get", "minor"], false] as any;
+// records only from the time window (no longer live) are drawn faded
+const PAST_OP = ["case", ["get", "past"], 0.4, 0.95] as any;
 const HAS_GLYPH = ["!=", ["get", "glyph"], ""] as any;
 // Zoom from which points become icon badges; fixed places worth seeing nationwide get them early.
 const BADGE_ZOOM: Record<string, number> = { satellites: 0, airports: 3, defence_sites: 3, nuclear: 3, border_posts: 4, launches: 3, cwc_rivers: 4 };
@@ -110,36 +112,39 @@ function addFeedLayers(map: maplibregl.Map, id: string, color: string) {
   map.addLayer({ id: `${id}-line`, type: "line", source: src, filter: ["any", isPoly, isLine],
     paint: { "line-color": ["get", "color"], "line-width": ["case", isLine, 1, 1.3], "line-opacity": ["case", isLine, id === "satellites" ? 0.35 : 0.45, 0.85],
       ...(id === "satellites" ? { "line-dasharray": [3, 2] } : {}) } }, before);
+  // fresh quakes (< 30 min): rings spreading out, sized by magnitude; animated in the ripple loop below
+  map.addLayer({ id: `${id}-ripple`, type: "circle", source: src, filter: ["all", isPoint, NOT_CLUSTER, ["==", ["get", "fresh"], true]],
+    paint: { "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": ["get", "color"], "circle-stroke-width": 1.6 } });
   // soft halo under alert points so severity reads at a glance
   map.addLayer({ id: `${id}-glow`, type: "circle", source: src, filter: ["all", isPoint, NOT_CLUSTER, ["!", ["get", "arrow"]], ["==", ["get", "sev"], 3]],
     paint: { "circle-color": ["get", "color"], "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 11, 8, 20], "circle-opacity": 0.2, "circle-blur": 0.6 } });
   // a coloured dot when zoomed out; from zoom 5 a dark badge with a coloured ring and the kind's glyph inside
   map.addLayer({ id: `${id}-circle`, type: "circle", source: src, filter: ["all", isPoint, NOT_CLUSTER, ["!", ["get", "arrow"]]],
     paint: { "circle-color": ["step", ["zoom"], ["get", "color"], bz, ["case", HAS_GLYPH, "#0a0f1c", ["get", "color"]]],
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 3, bz, ["case", HAS_GLYPH, 8.5, 3.5], 9, ["case", HAS_GLYPH, 13, 6]],
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 4, bz, ["case", HAS_GLYPH, 11, 4.5], 9, ["case", HAS_GLYPH, 16, 7.5]],
       "circle-stroke-color": ["step", ["zoom"], "#05070d", bz, ["case", HAS_GLYPH, ["get", "color"], "#05070d"]],
       "circle-stroke-width": ["step", ["zoom"], 0.8, bz, ["case", HAS_GLYPH, 1.4, 0.8]],
       // minor items (small airstrips, heliports) only once zoomed in
-      "circle-opacity": ["step", ["zoom"], ["case", MINOR, 0, 0.95], 7, 0.95], "circle-stroke-opacity": ["step", ["zoom"], ["case", MINOR, 0, 1], 7, 1] } });
+      "circle-opacity": ["step", ["zoom"], ["case", MINOR, 0, PAST_OP], 7, PAST_OP], "circle-stroke-opacity": ["step", ["zoom"], ["case", MINOR, 0, 1], 7, 1] } });
   map.addLayer({ id: `${id}-glyph`, type: "symbol", source: src, minzoom: bz, filter: ["all", isPoint, NOT_CLUSTER, ["!", ["get", "arrow"]], HAS_GLYPH],
     layout: { "icon-image": ["get", "glyph"], "icon-allow-overlap": true, "icon-ignore-placement": true,
-      "icon-size": ["interpolate", ["linear"], ["zoom"], bz, 0.32, 9, 0.48] },
-    paint: { "icon-color": ["get", "color"] } });
+      "icon-size": ["interpolate", ["linear"], ["zoom"], bz, 0.42, 9, 0.6] },
+    paint: { "icon-color": ["get", "color"], "icon-opacity": ["case", ["get", "past"], 0.45, 1] } });
   const isCluster = ["has", "point_count"] as any;
   const sevColor = ["match", ["get", "sev"], 3, "#ff4d4f", 2, "#ff8c1a", 1, "#ffd23f", color] as any;
   map.addLayer({ id: `${id}-cluster`, type: "circle", source: src, filter: isCluster,
     paint: { "circle-color": "#0a0f1c", "circle-stroke-color": sevColor, "circle-stroke-width": 1.2, "circle-opacity": 0.9,
-      "circle-radius": ["step", ["get", "point_count"], 8.5, 10, 10.5, 50, 12.5, 200, 14.5] } });
+      "circle-radius": ["step", ["get", "point_count"], 11, 10, 13.5, 50, 16, 200, 18.5] } });
   // a group shows its layer's icon in the ring, with the count as a small superscript
   map.addLayer({ id: `${id}-count`, type: "symbol", source: src, filter: isCluster,
-    layout: { ...(FEED_ICON[id] ? { "icon-image": FEED_ICON[id], "icon-size": 0.3, "icon-allow-overlap": true } : {}),
+    layout: { ...(FEED_ICON[id] ? { "icon-image": FEED_ICON[id], "icon-size": 0.38, "icon-allow-overlap": true } : {}),
       "text-field": ["get", "point_count_abbreviated"], "text-font": FONT, "text-size": 9, "text-allow-overlap": true,
       ...(FEED_ICON[id] ? { "text-offset": [1.15, -1.05], "text-anchor": "center" } : {}) },
     paint: { "icon-color": sevColor, "text-color": "#e7ecf4", "text-halo-color": "#0a0f1c", "text-halo-width": 2.2 } });
   map.addLayer({ id: `${id}-icon`, type: "symbol", source: src, filter: ["all", isPoint, ["get", "arrow"]],
     layout: { "icon-image": ["get", "icon"], "icon-rotate": ["get", "rot"], "icon-rotation-alignment": "map",
       "icon-pitch-alignment": "map", "icon-allow-overlap": true, "icon-ignore-placement": true,
-      "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.55, 6, 0.72, 10, 1.05] },
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 6, 0.92, 10, 1.3] },
     paint: { "icon-color": ["get", "color"], "icon-halo-color": "#02040a", "icon-halo-width": 1.2 } });
 }
 
@@ -157,7 +162,9 @@ function circle([lon, lat]: [number, number], km: number, n = 72) {
   return ring;
 }
 
-function drawPass(m: maplibregl.Map, r: Rec | undefined, now: number) {
+const clock = (t: number) => new Date(t).toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" });
+
+function drawPass(m: maplibregl.Map, r: Rec | undefined, now: number, area: Area | null) {
   const src = m.getSource("pass") as maplibregl.GeoJSONSource | undefined;
   if (!src) return;
   if (!r || r.lon === null) { src.setData({ type: "FeatureCollection", features: [] }); return; }
@@ -169,12 +176,23 @@ function drawPass(m: maplibregl.Map, r: Rec | undefined, now: number) {
     const every = sMin >= 20 ? 6 : 5; // a tick every 2 h on a 24 h figure-of-eight, every 10 min on a LEO pass
     feats.push({ type: "Feature", properties: { part: "done" }, geometry: { type: "LineString", coordinates: [...c.slice(0, k), pos] } });
     if (k < c.length) feats.push({ type: "Feature", properties: { part: "next" }, geometry: { type: "LineString", coordinates: [pos, ...c.slice(k)] } });
+    // ticks labelled with the IST clock time the satellite will be there; where it enters / leaves India, a labelled marker
+    let inside = area ? inArea(((pos[0] + 540) % 360) - 180, pos[1], area) : false;
     c.forEach((pt, i) => {
-      const min = Math.round((i - step) * sMin);
-      const label = min >= 120 ? `+${Math.round(min / 60)}h` : `+${min}m`;
-      if (min > 0 && i % every === 0) feats.push({ type: "Feature", properties: { part: "tick", label }, geometry: { type: "Point", coordinates: pt } });
+      const t = Date.parse(r.observed_at!) + i * trackStep(r) * 1000;
+      if (t <= now) return;
+      if (area) {
+        const nowIn = inArea(((pt[0] + 540) % 360) - 180, pt[1], area);
+        if (nowIn !== inside) feats.push({ type: "Feature", properties: { part: "edge", label: `${nowIn ? "Enters" : "Leaves"} India ${clock(t)}` },
+          geometry: { type: "Point", coordinates: pt } });
+        inside = nowIn;
+      }
+      if (i % every === 0) feats.push({ type: "Feature", properties: { part: "tick", label: clock(t) }, geometry: { type: "Point", coordinates: pt } });
     });
   }
+  const alt = Number(r.attrs.alt_km);
+  feats.push({ type: "Feature", properties: { part: "now", label: `${r.title}${alt ? ` · ${Math.round(alt).toLocaleString()} km up` : ""}` },
+    geometry: { type: "Point", coordinates: pos } });
   src.setData({ type: "FeatureCollection", features: feats });
 }
 
@@ -193,7 +211,7 @@ export function MapView(p: Props) {
     // a (re)created map starts empty: forget layers added to a previous instance (dev hot reload re-runs this effect)
     added.current = new Set(); ready.current = false;
     const m = new maplibregl.Map({ container: el.current!, style: STYLE, bounds: INDIA_FIT, fitBoundsOptions: { padding: FIT_PAD },
-      maxBounds: INDIA_BOUNDS, attributionControl: { compact: true }, maxPitch: 75 });
+      attributionControl: { compact: true }, maxPitch: 75 });
     map.current = m;
     m.dragRotate.disable(); m.touchZoomRotate.disableRotation();
     m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
@@ -204,9 +222,16 @@ export function MapView(p: Props) {
     const hover = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: "320px" });
     let hoverState: string | number | undefined;
     m.on("load", () => {
+      m.setProjection({ type: "globe" });
+      m.setSky({ "sky-color": "#05070d", "horizon-color": "#0b111f", "fog-color": "#05070d", "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] });
       for (const l of m.getStyle().layers) {
         if ((l as any)["source-layer"] === "boundary") { m.setLayoutProperty(l.id, "visibility", "none"); continue; }
         for (const [re, prop, val] of TINT) if (re.test(l.id)) try { m.setPaintProperty(l.id, prop, val); } catch { /* prop not on this layer type */ }
+        // zoomed out on the globe: Latin names only; provinces and cities only at India scale
+        if (/^place_|^water_name/.test(l.id)) m.setLayoutProperty(l.id, "text-field", ["coalesce", ["get", "name:latin"], ["get", "name"]]);
+        // (labels near the globe's edge float off it, so the whole-earth view has none)
+        if (/^place_country/.test(l.id)) { m.setLayoutProperty(l.id, "visibility", "none"); continue; } // ours: every country, one style
+        if (/^place_/.test(l.id)) m.setLayerZoomRange(l.id, /^place_(state|city)/.test(l.id) ? 4 : 3.2, l.maxzoom ?? 24);
       }
       m.addImage("openwatch-plane", plane, { sdf: true, pixelRatio: 2 });
       m.addImage("openwatch-ship", ship, { sdf: true, pixelRatio: 2 });
@@ -236,13 +261,19 @@ export function MapView(p: Props) {
         paint: { "text-color": "#7dd3fc", "text-halo-color": "#02030a", "text-halo-width": 1.3 } });
       m.addSource("traffic", { type: "raster", tiles: ["/api/tiles/traffic/{z}/{x}/{y}.png"], tileSize: 256, attribution: "Traffic © TomTom" });
       m.addLayer({ id: "traffic", type: "raster", source: "traffic", layout: { visibility: "none" }, paint: { "raster-opacity": 0.75 } });
+      // Day: NASA Blue Marble imagery (public domain, GIBS) under roads and labels; Night: the dark vector basemap alone
+      m.addSource("bluemarble", { type: "raster", tileSize: 256, maxzoom: 8, attribution: "Imagery: NASA Blue Marble (GIBS)",
+        tiles: ["https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg"] });
+      m.addLayer({ id: "day", type: "raster", source: "bluemarble", layout: { visibility: props.current.day ? "visible" : "none" },
+        paint: { "raster-opacity": 0.9 } }, m.getStyle().layers.find((l) => l.type !== "background" && l.type !== "fill")?.id);
       m.addSource("mask", { type: "geojson", data: "/geo/mask.geojson" });
       m.addLayer({ id: "mask", type: "fill", source: "mask", paint: { "fill-color": "#020308", "fill-opacity": 0.72 } });
       m.addSource("neighbours", { type: "geojson", data: "/geo/neighbours.geojson", attribution: "Borders: Natural Earth" });
       m.addLayer({ id: "neighbour-lines", type: "line", source: "neighbours", filter: ["==", ["get", "kind"], "border"],
         paint: { "line-color": "#3b4760", "line-width": 0.8, "line-dasharray": [2, 1.5] } });
       m.addLayer({ id: "neighbour-labels", type: "symbol", source: "neighbours", filter: ["==", ["get", "kind"], "label"],
-        layout: { "text-field": ["upcase", ["get", "name"]], "text-font": FONT, "text-size": 11, "text-letter-spacing": 0.25 },
+        layout: { "text-field": ["upcase", ["get", "name"]], "text-font": FONT, "text-letter-spacing": 0.25, "symbol-sort-key": ["get", "rank"],
+          "text-size": ["interpolate", ["linear"], ["get", "rank"], 1, 12, 6, 9.5] },
         paint: { "text-color": "#56627a", "text-halo-color": "#02030a", "text-halo-width": 1.2 } });
       m.addSource("maritime", { type: "geojson", data: "/geo/maritime.geojson", attribution: "Maritime zones: Marine Regions (VLIZ), CC BY 4.0" });
       const zc = ["match", ["get", "zone"], "TS", "#2dd4bf", "CZ", "#22d3ee", "#38bdf8"] as any;
@@ -311,6 +342,11 @@ export function MapView(p: Props) {
       m.addLayer({ id: "pass-tick-label", type: "symbol", source: "pass", filter: ["==", ["get", "part"], "tick"],
         layout: { "text-field": ["get", "label"], "text-font": FONT, "text-size": 10, "text-offset": [0, -1], "text-allow-overlap": true },
         paint: { "text-color": "#d8c8ff", "text-halo-color": "#02030a", "text-halo-width": 1.4 } });
+      m.addLayer({ id: "pass-edge", type: "circle", source: "pass", filter: ["==", ["get", "part"], "edge"],
+        paint: { "circle-radius": 5, "circle-color": "#ff9933", "circle-stroke-color": "#02030a", "circle-stroke-width": 1.5 } });
+      m.addLayer({ id: "pass-label", type: "symbol", source: "pass", filter: ["match", ["get", "part"], ["edge", "now"], true, false],
+        layout: { "text-field": ["get", "label"], "text-font": FONT, "text-size": 12, "text-offset": [0, 1.4], "text-anchor": "top", "text-allow-overlap": true },
+        paint: { "text-color": ["match", ["get", "part"], "edge", "#ffb366", "#ffffff"], "text-halo-color": "#02030a", "text-halo-width": 1.8 } });
       m.addSource("history", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       m.addLayer({ id: "history", type: "line", source: "history", paint: { "line-color": "#ffffff", "line-width": 2, "line-opacity": 0.75, "line-dasharray": [1, 1.5] } });
       m.addSource("sel", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
@@ -427,9 +463,28 @@ export function MapView(p: Props) {
         const selId = sel?.feed === feed ? sel.id : undefined;
         (m.getSource(`src-${feed}`) as maplibregl.GeoJSONSource).setData(toFeatures(live[feed], sec[feed], area, now, selId, props.current.overlays.orbits) as any);
       }
-      drawPass(m, sel?.feed === "satellites" ? live.satellites?.find((r) => r.id === sel.id) : undefined, now);
+      drawPass(m, sel?.feed === "satellites" ? live.satellites?.find((r) => r.id === sel.id) : undefined, now, area);
     }), 1000);
     return () => clearInterval(t);
+  }, []);
+
+  // quake ripples: one 2.4 s cycle shared by every fresh quake (M5 grows to ~50 px)
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
+      const m = map.current;
+      if (!ready.current || !m) return;
+      const t = (performance.now() % 2400) / 2400;
+      for (const feed of ["ncs_quakes", "usgs_quakes"]) {
+        const id = `${feed}-ripple`;
+        if (!m.getLayer(id)) continue;
+        m.setPaintProperty(id, "circle-radius", ["+", 6, ["*", 9 * t, ["max", ["get", "mag"], 2]]]);
+        m.setPaintProperty(id, "circle-stroke-opacity", 1 - t);
+      }
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   useEffect(() => whenReady((m) => {
@@ -448,8 +503,6 @@ export function MapView(p: Props) {
 
   useEffect(() => whenReady((m) => {
     const india = p.scope === "india";
-    m.setMaxBounds(india ? INDIA_BOUNDS : null);
-    m.setMinZoom(india ? 2.6 : 1);
     m.setLayoutProperty("mask", "visibility", india ? "visible" : "none");
     if (india) m.fitBounds(INDIA_FIT, { padding: FIT_PAD, duration: 600 });
   }), [p.scope]);
@@ -473,6 +526,11 @@ export function MapView(p: Props) {
     const b = stateBox.current[p.state];
     if (b) m.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { ...FIT_PAD, top: 170 }, duration: 1400, essential: true, maxZoom: 9, pitch: m.getPitch() });
   }), [p.state]);
+
+  useEffect(() => whenReady((m) => {
+    m.setLayoutProperty("day", "visibility", p.day ? "visible" : "none");
+    m.setPaintProperty("mask", "fill-opacity", p.day ? 0.4 : 0.72);
+  }), [p.day]);
 
   // 3D: terrain + tilt + extruded buildings; 2D: flat and north-up
   useEffect(() => whenReady((m) => {
