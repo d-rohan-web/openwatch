@@ -1,5 +1,5 @@
-// The map: one GeoJSON source per feed over a retinted dark basemap. India scope locks the view to India and dims
-// everything outside the official outline (Survey of India, via datameet); the basemap's own borders are hidden and
+// The map: one GeoJSON source per feed over a retinted dark basemap, drawn as a globe you can spin freely. India scope
+// dims everything outside the official outline (Survey of India, via datameet); the basemap's own borders are hidden and
 // replaced by our border layers. States are clickable; 3D adds terrain, tilt and buildings.
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import * as lucide from "lucide";
 import { alongTrack, FEED_ICON, feedColor, GLYPHS, inArea, inScope, MOVING_FEEDS, toFeatures, trackStep, type Area } from "./features";
 import { SEVERITY_RANK } from "./types";
-import { INDIA_BOUNDS, INDIA_FIT } from "./sections";
+import { INDIA_FIT } from "./sections";
 import type { FeedMeta, Rec } from "./types";
 
 const STYLE = "https://tiles.openfreemap.org/styles/dark";
@@ -193,7 +193,7 @@ export function MapView(p: Props) {
     // a (re)created map starts empty: forget layers added to a previous instance (dev hot reload re-runs this effect)
     added.current = new Set(); ready.current = false;
     const m = new maplibregl.Map({ container: el.current!, style: STYLE, bounds: INDIA_FIT, fitBoundsOptions: { padding: FIT_PAD },
-      maxBounds: INDIA_BOUNDS, attributionControl: { compact: true }, maxPitch: 75 });
+      attributionControl: { compact: true }, maxPitch: 75 });
     map.current = m;
     m.dragRotate.disable(); m.touchZoomRotate.disableRotation();
     m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
@@ -204,6 +204,8 @@ export function MapView(p: Props) {
     const hover = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: "320px" });
     let hoverState: string | number | undefined;
     m.on("load", () => {
+      m.setProjection({ type: "globe" });
+      m.setSky({ "sky-color": "#05070d", "horizon-color": "#0b111f", "fog-color": "#05070d", "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] });
       for (const l of m.getStyle().layers) {
         if ((l as any)["source-layer"] === "boundary") { m.setLayoutProperty(l.id, "visibility", "none"); continue; }
         for (const [re, prop, val] of TINT) if (re.test(l.id)) try { m.setPaintProperty(l.id, prop, val); } catch { /* prop not on this layer type */ }
@@ -448,8 +450,6 @@ export function MapView(p: Props) {
 
   useEffect(() => whenReady((m) => {
     const india = p.scope === "india";
-    m.setMaxBounds(india ? INDIA_BOUNDS : null);
-    m.setMinZoom(india ? 2.6 : 1);
     m.setLayoutProperty("mask", "visibility", india ? "visible" : "none");
     if (india) m.fitBounds(INDIA_FIT, { padding: FIT_PAD, duration: 600 });
   }), [p.scope]);
