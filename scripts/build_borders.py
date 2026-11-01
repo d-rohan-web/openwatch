@@ -75,7 +75,7 @@ for d, g in records("ne_10m_admin_0_boundary_lines_land"):
     if not rest.is_empty and rest.length > 0.05:
         lines.append(rest)
 nfeats = [{"type": "Feature", "properties": {"kind": "border"}, "geometry": rounded(unary_union(lines).simplify(0.01), 3)}]
-for name, (d, g) in countries.items():
+for name, (d, _g) in countries.items():
     if d.get("LABEL_X") is not None:
         p = (float(d["LABEL_X"]), float(d["LABEL_Y"]))
         if name == "India" or not india.contains(shape({"type": "Point", "coordinates": p})):
