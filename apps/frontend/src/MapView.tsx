@@ -19,8 +19,8 @@ export type Overlays = { highways: boolean; railways: boolean; rivers: boolean; 
 const fitPad = (panel: boolean) => ({ top: 118, bottom: 108, left: 24, right: panel ? 404 : 24 });
 let FIT_PAD = fitPad(true);
 const FONT = ["Noto Sans Regular"];
-// Home: all of India, pulled back enough that the globe's curve and the satellites around it are in view.
-const HOME_ZOOM_OUT = 0.8;
+// Home: all of India filling the map (raise HOME_ZOOM_OUT to pull back and show more of the globe).
+const HOME_ZOOM_OUT = 0;
 function home(m: maplibregl.Map, duration = 0) {
   const cam = m.cameraForBounds(INDIA_FIT, { padding: FIT_PAD });
   if (cam) m.easeTo({ center: cam.center, zoom: (cam.zoom ?? 4) - HOME_ZOOM_OUT, pitch: m.getPitch(), bearing: 0, duration });
