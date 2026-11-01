@@ -11,3 +11,10 @@ def test_parse():
     assert silver["attrs"]["unit"] == "INR/kg" and silver["severity"] == "warning"  # -4.8 %
     [brent] = parse_brent(json.loads(Path("tests/fixtures/commodities_india_brent.json").read_text()))
     assert brent["title"] == "BRENT 113.43 ▲2.37%" and brent["severity"] == "advisory"
+
+
+def test_brent_when_market_closed():
+    # weekends: Yahoo keeps the last price but sends no timestamps
+    d = {"BZ=F": {"timestamp": [], "fulldayPrice": 113.43, "chartPreviousClose": 110.8}}
+    [brent] = parse_brent(d)
+    assert brent["title"] == "BRENT 113.43 ▲2.37%" and brent["observed_at"] is None

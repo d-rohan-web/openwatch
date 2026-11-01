@@ -40,7 +40,8 @@ def parse_brent(d: dict) -> list[dict]:
     price, prev = s.get("fulldayPrice"), s.get("chartPreviousClose")
     if not price or not prev:
         return []
-    as_of = datetime.fromtimestamp(s["timestamp"][-1], UTC).isoformat()
+    ts = s.get("timestamp") or []  # empty while the market is closed (weekends); the last price still stands
+    as_of = datetime.fromtimestamp(ts[-1], UTC).isoformat() if ts else None
     return [ticker("BRENT", float(price), float(prev), unit="USD/bbl", currency="USD", as_of=as_of, source="Yahoo Finance (ICE Brent futures)")]
 
 
