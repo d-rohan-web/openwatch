@@ -16,7 +16,7 @@ jobs:
     name: Lint (ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
       - run: uv run --frozen ruff check --output-format=github .
 
@@ -24,7 +24,7 @@ jobs:
     name: Review checks (AI smells, policy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - run: git diff --unified=0 "origin/${{ github.base_ref }}...HEAD" | python3 scripts/ci/review_checks.py
 
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     container: semgrep/semgrep:1.140.0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: >
           semgrep scan --metrics=off --error --severity ERROR
           --config p/python --config p/typescript --config p/secrets --config p/dockerfile
@@ -43,7 +43,7 @@ jobs:
     name: Leak scan (TruffleHog)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - name: Verified secrets in this PR's commits
         run: >
