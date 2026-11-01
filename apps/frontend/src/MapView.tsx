@@ -209,6 +209,11 @@ export function MapView(p: Props) {
       for (const l of m.getStyle().layers) {
         if ((l as any)["source-layer"] === "boundary") { m.setLayoutProperty(l.id, "visibility", "none"); continue; }
         for (const [re, prop, val] of TINT) if (re.test(l.id)) try { m.setPaintProperty(l.id, prop, val); } catch { /* prop not on this layer type */ }
+        // zoomed out on the globe: Latin names only; provinces and cities only at India scale
+        if (/^place_|^water_name/.test(l.id)) m.setLayoutProperty(l.id, "text-field", ["coalesce", ["get", "name:latin"], ["get", "name"]]);
+        // (labels near the globe's edge float off it, so the whole-earth view has none)
+        if (/^place_country/.test(l.id)) { m.setLayoutProperty(l.id, "visibility", "none"); continue; } // ours: every country, one style
+        if (/^place_/.test(l.id)) m.setLayerZoomRange(l.id, /^place_(state|city)/.test(l.id) ? 4 : 3.2, l.maxzoom ?? 24);
       }
       m.addImage("openwatch-plane", plane, { sdf: true, pixelRatio: 2 });
       m.addImage("openwatch-ship", ship, { sdf: true, pixelRatio: 2 });
@@ -244,7 +249,8 @@ export function MapView(p: Props) {
       m.addLayer({ id: "neighbour-lines", type: "line", source: "neighbours", filter: ["==", ["get", "kind"], "border"],
         paint: { "line-color": "#3b4760", "line-width": 0.8, "line-dasharray": [2, 1.5] } });
       m.addLayer({ id: "neighbour-labels", type: "symbol", source: "neighbours", filter: ["==", ["get", "kind"], "label"],
-        layout: { "text-field": ["upcase", ["get", "name"]], "text-font": FONT, "text-size": 11, "text-letter-spacing": 0.25 },
+        layout: { "text-field": ["upcase", ["get", "name"]], "text-font": FONT, "text-letter-spacing": 0.25, "symbol-sort-key": ["get", "rank"],
+          "text-size": ["interpolate", ["linear"], ["get", "rank"], 1, 12, 6, 9.5] },
         paint: { "text-color": "#56627a", "text-halo-color": "#02030a", "text-halo-width": 1.2 } });
       m.addSource("maritime", { type: "geojson", data: "/geo/maritime.geojson", attribution: "Maritime zones: Marine Regions (VLIZ), CC BY 4.0" });
       const zc = ["match", ["get", "zone"], "TS", "#2dd4bf", "CZ", "#22d3ee", "#38bdf8"] as any;

@@ -3,7 +3,7 @@
   apps/frontend/public/geo/borders.geojson    India's official land boundary split by neighbour, with MHA lengths
   apps/frontend/public/geo/defacto.geojson    LoC / LAC / Siachen lines (de facto, approximate; India does not recognise
                                               them as boundaries), from Natural Earth's FCLASS_IN = "Unrecognized"
-  apps/frontend/public/geo/neighbours.geojson other countries' land borders in the region (outside India) + labels
+  apps/frontend/public/geo/neighbours.geojson every other country's land borders (outside India) + labels
 
 uv run --with pyshp --with shapely python scripts/build_borders.py <dir with ne_10m_admin_0_countries.* and
   ne_10m_admin_0_boundary_lines_land.*>   (run after build_geo.py: reads public/geo/india.geojson)
@@ -19,7 +19,7 @@ from shapely.ops import linemerge, unary_union
 src = sys.argv[1]
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 geo = os.path.join(root, "apps/frontend/public/geo")
-REGION = box(55, 0, 105, 40)
+REGION = box(-180, -85, 180, 85)  # the whole globe
 # Ministry of Home Affairs (Department of Border Management) land boundary lengths, km
 MHA_KM = {"Bangladesh": 4096.7, "China": 3488, "Pakistan": 3323, "Nepal": 1751, "Myanmar": 1643, "Bhutan": 699,
           "Afghanistan": 106}
@@ -64,7 +64,7 @@ for d, g in records("ne_10m_admin_0_boundary_lines_land"):
                     "geometry": rounded(g)})
 json.dump({"type": "FeatureCollection", "features": defacto}, open(os.path.join(geo, "defacto.geojson"), "w"), separators=(",", ":"))
 
-# 3. neighbours' own land borders, outside India's claim, plus country labels
+# 3. other countries' land borders, outside India's claim, plus every country's label (rank: Natural Earth LABELRANK, 1 = biggest)
 lines = []
 for d, g in records("ne_10m_admin_0_boundary_lines_land"):
     if "India" in (d["ADM0_LEFT"], d["ADM0_RIGHT"]) or not g.intersects(REGION):
@@ -76,10 +76,10 @@ for d, g in records("ne_10m_admin_0_boundary_lines_land"):
         lines.append(rest)
 nfeats = [{"type": "Feature", "properties": {"kind": "border"}, "geometry": rounded(unary_union(lines).simplify(0.01), 3)}]
 for name, (d, g) in countries.items():
-    if name != "India" and g.intersects(REGION) and d.get("LABEL_X") is not None:
+    if d.get("LABEL_X") is not None:
         p = (float(d["LABEL_X"]), float(d["LABEL_Y"]))
-        if REGION.contains(shape({"type": "Point", "coordinates": p})) and not india.contains(shape({"type": "Point", "coordinates": p})):
-            nfeats.append({"type": "Feature", "properties": {"kind": "label", "name": d["NAME"]},
+        if name == "India" or not india.contains(shape({"type": "Point", "coordinates": p})):
+            nfeats.append({"type": "Feature", "properties": {"kind": "label", "name": d["NAME"], "rank": int(d["LABELRANK"])},
                            "geometry": {"type": "Point", "coordinates": [round(p[0], 3), round(p[1], 3)]}})
 json.dump({"type": "FeatureCollection", "features": nfeats}, open(os.path.join(geo, "neighbours.geojson"), "w"), separators=(",", ":"))
 print(len(feats), "border segments;", len(defacto), "de facto lines;", len(nfeats) - 1, "country labels")
