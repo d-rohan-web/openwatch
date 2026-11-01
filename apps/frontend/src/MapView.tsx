@@ -162,7 +162,9 @@ function circle([lon, lat]: [number, number], km: number, n = 72) {
   return ring;
 }
 
-function drawPass(m: maplibregl.Map, r: Rec | undefined, now: number) {
+const clock = (t: number) => new Date(t).toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" });
+
+function drawPass(m: maplibregl.Map, r: Rec | undefined, now: number, area: Area | null) {
   const src = m.getSource("pass") as maplibregl.GeoJSONSource | undefined;
   if (!src) return;
   if (!r || r.lon === null) { src.setData({ type: "FeatureCollection", features: [] }); return; }
@@ -174,12 +176,23 @@ function drawPass(m: maplibregl.Map, r: Rec | undefined, now: number) {
     const every = sMin >= 20 ? 6 : 5; // a tick every 2 h on a 24 h figure-of-eight, every 10 min on a LEO pass
     feats.push({ type: "Feature", properties: { part: "done" }, geometry: { type: "LineString", coordinates: [...c.slice(0, k), pos] } });
     if (k < c.length) feats.push({ type: "Feature", properties: { part: "next" }, geometry: { type: "LineString", coordinates: [pos, ...c.slice(k)] } });
+    // ticks labelled with the IST clock time the satellite will be there; where it enters / leaves India, a labelled marker
+    let inside = area ? inArea(((pos[0] + 540) % 360) - 180, pos[1], area) : false;
     c.forEach((pt, i) => {
-      const min = Math.round((i - step) * sMin);
-      const label = min >= 120 ? `+${Math.round(min / 60)}h` : `+${min}m`;
-      if (min > 0 && i % every === 0) feats.push({ type: "Feature", properties: { part: "tick", label }, geometry: { type: "Point", coordinates: pt } });
+      const t = Date.parse(r.observed_at!) + i * trackStep(r) * 1000;
+      if (t <= now) return;
+      if (area) {
+        const nowIn = inArea(((pt[0] + 540) % 360) - 180, pt[1], area);
+        if (nowIn !== inside) feats.push({ type: "Feature", properties: { part: "edge", label: `${nowIn ? "Enters" : "Leaves"} India ${clock(t)}` },
+          geometry: { type: "Point", coordinates: pt } });
+        inside = nowIn;
+      }
+      if (i % every === 0) feats.push({ type: "Feature", properties: { part: "tick", label: clock(t) }, geometry: { type: "Point", coordinates: pt } });
     });
   }
+  const alt = Number(r.attrs.alt_km);
+  feats.push({ type: "Feature", properties: { part: "now", label: `${r.title}${alt ? ` · ${Math.round(alt).toLocaleString()} km up` : ""}` },
+    geometry: { type: "Point", coordinates: pos } });
   src.setData({ type: "FeatureCollection", features: feats });
 }
 
@@ -329,6 +342,11 @@ export function MapView(p: Props) {
       m.addLayer({ id: "pass-tick-label", type: "symbol", source: "pass", filter: ["==", ["get", "part"], "tick"],
         layout: { "text-field": ["get", "label"], "text-font": FONT, "text-size": 10, "text-offset": [0, -1], "text-allow-overlap": true },
         paint: { "text-color": "#d8c8ff", "text-halo-color": "#02030a", "text-halo-width": 1.4 } });
+      m.addLayer({ id: "pass-edge", type: "circle", source: "pass", filter: ["==", ["get", "part"], "edge"],
+        paint: { "circle-radius": 5, "circle-color": "#ff9933", "circle-stroke-color": "#02030a", "circle-stroke-width": 1.5 } });
+      m.addLayer({ id: "pass-label", type: "symbol", source: "pass", filter: ["match", ["get", "part"], ["edge", "now"], true, false],
+        layout: { "text-field": ["get", "label"], "text-font": FONT, "text-size": 12, "text-offset": [0, 1.4], "text-anchor": "top", "text-allow-overlap": true },
+        paint: { "text-color": ["match", ["get", "part"], "edge", "#ffb366", "#ffffff"], "text-halo-color": "#02030a", "text-halo-width": 1.8 } });
       m.addSource("history", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       m.addLayer({ id: "history", type: "line", source: "history", paint: { "line-color": "#ffffff", "line-width": 2, "line-opacity": 0.75, "line-dasharray": [1, 1.5] } });
       m.addSource("sel", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
@@ -445,7 +463,7 @@ export function MapView(p: Props) {
         const selId = sel?.feed === feed ? sel.id : undefined;
         (m.getSource(`src-${feed}`) as maplibregl.GeoJSONSource).setData(toFeatures(live[feed], sec[feed], area, now, selId, props.current.overlays.orbits) as any);
       }
-      drawPass(m, sel?.feed === "satellites" ? live.satellites?.find((r) => r.id === sel.id) : undefined, now);
+      drawPass(m, sel?.feed === "satellites" ? live.satellites?.find((r) => r.id === sel.id) : undefined, now, area);
     }), 1000);
     return () => clearInterval(t);
   }, []);
