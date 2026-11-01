@@ -18,13 +18,13 @@ export type Overlays = { highways: boolean; railways: boolean; rivers: boolean; 
 const fitPad = (panel: boolean) => ({ top: 118, bottom: 108, left: 24, right: panel ? 404 : 24 });
 let FIT_PAD = fitPad(true);
 const FONT = ["Noto Sans Regular"];
-// Home: the maintainer's chosen view, taken from a 1512 × 746 map with the panel open; zoom scales with the window's
-// height, and with the panel closed the view shifts by half its width so India stays centred.
-const HOME = { center: [88.9236, 21.9787] as [number, number], zoom: 4.4044, height: 746 };
+// Home: the maintainer's chosen view, taken from a 1512 × 746 map with the panel closed; zoom scales with the window's
+// height, and with the panel open the view shifts by half its width so India stays centred in what's visible.
+const HOME = { center: [80.4497, 23.3055] as [number, number], zoom: 3.6778, height: 746 };
 const homeZoom = (h: number) => HOME.zoom + Math.log2(Math.max(h, 300) / HOME.height);
-const PANEL_OPEN_PAD = fitPad(true);
+const HOME_PAD = fitPad(false);
 function home(m: maplibregl.Map, duration = 0) {
-  const offset: [number, number] = [((FIT_PAD.left - FIT_PAD.right) - (PANEL_OPEN_PAD.left - PANEL_OPEN_PAD.right)) / 2, 0];
+  const offset: [number, number] = [((FIT_PAD.left - FIT_PAD.right) - (HOME_PAD.left - HOME_PAD.right)) / 2, 0];
   m.easeTo({ center: HOME.center, zoom: homeZoom(m.getCanvas().clientHeight), offset, pitch: m.getPitch(), bearing: 0, duration });
 }
 

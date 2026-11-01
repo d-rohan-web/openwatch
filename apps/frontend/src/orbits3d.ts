@@ -132,7 +132,7 @@ export function satelliteLayer(get: () => State): maplibregl.CustomLayerInterfac
         const h = shownAlt(Number(r.attrs.alt_km) || 500), c = rgb(color(r)), sel = r.id === selected;
         const top = spherePos(g[0], g[1], h), foot = spherePos(g[0], g[1], 0.002);
         if (visible(eye, top)) {
-          vert(points, top, c, 1, (sel ? 40 : 28) * devicePixelRatio); // gl_PointSize is in device pixels
+          vert(points, top, c, 1, (sel ? 26 : 17) * devicePixelRatio); // gl_PointSize is in device pixels
           hits.push({ id: r.id, ...toScreen(top) });
           if (sel && visible(eye, foot)) { vert(lines, top, c, 0.8); vert(lines, foot, c, 0.8); }
         }
