@@ -200,4 +200,5 @@ FEED = Feed(id="satellites", label="Satellites (CelesTrak + SGP4)", section="spa
             homepage="https://celestrak.org/NORAD/elements/",
             terms="CelesTrak GP/SATCAT: free public data from US Space Force (space-track.org) via CelesTrak; "
                   "elements fetched at most every 6 h per CelesTrak usage policy",
-            every=60, fetch=fetch, store_all=False)
+            every=60, fetch=fetch, store_all=False,
+            push_every=600)  # browsers glide satellites along the track themselves: a fresh one every 10 min is plenty

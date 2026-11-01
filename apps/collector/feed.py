@@ -36,6 +36,7 @@ class Feed:
     ttl: float = 0          # non-snapshot feeds: drop a live record not seen for this many seconds
     store_all: bool = False  # archive every record (moving things) instead of only changed ones
     keep_raw: bool = True   # archive raw responses (off for high-rate feeds whose raw bytes never repeat)
+    push_every: float = 0   # send changed records to browsers at most this often (seconds); 0 = on every change
     hosts: list[str] = field(default_factory=list)  # outbound hosts, filled in from requests as they happen
 
     def meta(self) -> dict:

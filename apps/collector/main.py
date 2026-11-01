@@ -68,6 +68,16 @@ def redact(msg: str, feeds: list[Feed]) -> str:
 
 
 
+def signature(recs: list[dict]) -> int:
+    """What browsers would see of a feed's records; ignores fetched_at, which every poll restamps."""
+    return hash(dumps([{k: v for k, v in r.items() if k != "fetched_at"} for r in recs]))
+
+
+def should_push(last: tuple[int, float] | None, sig: int, now: float, push_every: float) -> bool:
+    """Send records when they changed, and not more often than push_every."""
+    return last is None or (sig != last[0] and now - last[1] >= push_every)
+
+
 def next_poll(every: float, fails: int) -> float:
     """Seconds until the next poll. A failing feed retries after 1, 2, 4… minutes (at most hourly), not after its
     normal interval: a weekly feed that hit a timeout on startup would otherwise sit empty for two weeks."""
@@ -82,6 +92,7 @@ class Runner:
                                                "last_error_at": None, "last_count": 0, "stored_total": 0,
                                                "fails": 0} for f in feeds}
         self.dirty: set[str] = set()
+        self.pushed: dict[str, tuple[int, float]] = {}  # feed -> (signature, monotonic time) of the records last sent
 
     def take(self, f: Feed, records: list[dict], raw_sha: str | None) -> None:
         """Stamp, archive and fold a batch into live state."""
@@ -165,6 +176,7 @@ class Runner:
             if not dirty:
                 continue
             pipe = self.r.pipeline()
+            by_id = {f.id: f for f in self.feeds}
             for fid in dirty:
                 recs = list(self.state[fid].values())
                 LIVE.labels(fid).set(len(recs))
@@ -172,7 +184,13 @@ class Runner:
                     LIVE_SEV.labels(fid, sev).set(sum(r.get("severity") == sev for r in recs))
                 FAILS.labels(fid).set(1 if self.health[fid]["state"] in ("DEGRADED", "DOWN") else 0)
                 h = {**self.health[fid], "live_count": len(recs)}
-                pipe.set(live_key(fid), dumps(recs)).set(health_key(fid), dumps(h)).publish(EVENTS, fid)
+                pipe.set(health_key(fid), dumps(h))
+                sig = signature(recs)
+                if should_push(self.pushed.get(fid), sig, t, by_id[fid].push_every):
+                    self.pushed[fid] = (sig, t)
+                    pipe.set(live_key(fid), dumps(recs)).publish(EVENTS, fid)
+                else:  # same records (or too soon): browsers only need the new health
+                    pipe.publish(EVENTS, f"{fid} health")
             try:
                 await pipe.execute()
             except Exception as e:

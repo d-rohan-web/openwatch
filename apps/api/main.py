@@ -90,9 +90,16 @@ async def live(feed: list[str] = Query(default=[])):
     return {i: json.loads(v) if v else [] for i, v in zip(ids, vals)}
 
 
+def sse_event(fid: str, recs: str | None, health: str | None) -> str:
+    """One `feed` event from the stored JSON; `records` is left out when only the health changed."""
+    body = f'"feed":{json.dumps(fid)},' + (f'"records":{recs},' if recs is not None else "") + f'"health":{health or "null"}'
+    return f"event: feed\ndata: {{{body}}}\n\n"
+
+
 @app.get("/api/stream")
 async def stream(request: Request):
-    """SSE. `feed` events carry {feed, records, health} whenever a feed's live state changes."""
+    """SSE. `feed` events carry {feed, records, health} when a feed's records change, {feed, health} when only its
+    health did (a poll that brought the same records)."""
     async def gen():
         ps = r.pubsub()
         await ps.subscribe(EVENTS)
@@ -104,9 +111,12 @@ async def stream(request: Request):
                 if msg is None:
                     yield ": ping\n\n"  # keep proxies from closing an idle stream
                     continue
-                fid = msg["data"]
-                recs, h = await r.mget(live_key(fid), health_key(fid))
-                event = f"event: feed\ndata: {{\"feed\":{json.dumps(fid)},\"records\":{recs or '[]'},\"health\":{h or 'null'}}}\n\n"
+                fid, _, kind = msg["data"].partition(" ")
+                if kind == "health":  # records unchanged: the browser keeps what it has
+                    event = sse_event(fid, None, await r.get(health_key(fid)))
+                else:
+                    recs, h = await r.mget(live_key(fid), health_key(fid))
+                    event = sse_event(fid, recs or "[]", h)
                 STREAM_BYTES.inc(len(event))
                 STREAM_EVENTS.labels(fid).inc()
                 yield event

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import zlib
 from urllib.parse import quote
 
 import httpx
@@ -86,9 +87,12 @@ async def export(request: Request):
 
 
 @app.get("/ui/stream")
-async def stream():
-    """The live SSE stream, relayed chunk by chunk. If the core API is down the browser is told to retry."""
-    async def gen():
+async def stream(request: Request):
+    """The live SSE stream, relayed chunk by chunk. If the core API is down the browser is told to retry.
+
+    Gzipped here, flushed per chunk: Caddy leaves event streams uncompressed, and this JSON shrinks ~5-10x.
+    """
+    async def relay_chunks():
         try:
             async with client.stream("GET", "/api/stream", timeout=httpx.Timeout(None, connect=5)) as r:
                 if r.status_code != 200:
@@ -98,4 +102,13 @@ async def stream():
                     yield chunk
         except httpx.HTTPError:
             yield b"retry: 3000\n\n"
-    return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+    headers = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no", "Vary": "Accept-Encoding"}
+    if "gzip" not in request.headers.get("accept-encoding", ""):
+        return StreamingResponse(relay_chunks(), media_type="text/event-stream", headers=headers)
+
+    async def gzipped():
+        z = zlib.compressobj(6, zlib.DEFLATED, 31)  # 31: gzip container
+        async for chunk in relay_chunks():
+            yield z.compress(chunk) + z.flush(zlib.Z_SYNC_FLUSH)
+        yield z.flush()  # upstream ended (e.g. a retry hint): close the gzip stream properly
+    return StreamingResponse(gzipped(), media_type="text/event-stream", headers={**headers, "Content-Encoding": "gzip"})
