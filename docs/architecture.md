@@ -4,9 +4,10 @@
 
 | Service | Role | Port |
 |---|---|---|
-| `caddy` | automatic HTTPS (Let's Encrypt for a public name, internal CA on localhost), zstd/gzip, routes `/api` → api (SSE flushed immediately), `/` → frontend | 39443 / 39080 (443/80 on a server) |
-| `frontend` | built React + MapLibre SPA, static | — |
-| `api` | FastAPI: live state, SSE stream, history, records, export, raw bytes, TomTom tile proxy, `/metrics` | — |
+| `caddy` | automatic HTTPS (Let's Encrypt for a public name, internal CA on localhost), zstd/gzip, CSP and security headers; routes `/ui` → bff (SSE flushed immediately), `/` → frontend. `/api` is not served publicly unless `OPENWATCH_PUBLIC_API=true` | 39443 / 39080 (443/80 on a server) |
+| `frontend` | built React + MapLibre SPA, static (nginx: hashed assets cached a year, `index.html` revalidated) | — |
+| `bff` | backend for frontend: the only API the browser reaches (`/ui/*`), an allow-list of what the UI uses; calls `api` on the compose network and hides upstream errors | — |
+| `api` | core FastAPI (private): live state, SSE stream, history, records, export, raw bytes, TomTom tile proxy, `/metrics` | — |
 | `collector` | runs every feed; writes the archive; publishes live state + health to Redis; `/metrics` on 9101 | — |
 | `redis` | live state and pub/sub only (no persistence: the archive is the record) | — |
 | `prometheus`, `loki`, `alloy`, `grafana` | `monitoring` profile: metrics, JSON logs, feed dashboard | 39300 (grafana) |
@@ -18,7 +19,7 @@ the monitoring stores.
  sources ──HTTP/WS──▶ collector ──append──▶ archive volume (JSONL → hourly Parquet, raw/*.gz)
                          │                         ▲
                          └─SET/PUBLISH─▶ redis ─SUB─┤
-                                                   api ◀── caddy ◀── browser (SSE + REST)
+                                                   api ◀── bff ◀── caddy ◀── browser (/ui: SSE + REST)
 ```
 
 ## 2. The record
@@ -64,7 +65,20 @@ raw/<feed>/<YYYY-MM-DD>/<sha256>.<ext>.gz              original bytes, deduped b
 - **TLS**: certifi plus `packages/common/data/extra_ca.pem`, for government hosts that don't send their
   intermediate certificate. Verification stays on.
 
-## 5. API (`apps/api/main.py`)
+## 5. API
+
+The browser only talks to the **backend for frontend** (`apps/bff/main.py`). It calls the core API over the compose
+network, passes 4xx details through (they're meant for users) and turns upstream failures into a plain 502.
+
+| BFF (`/ui`, public) | Core API |
+|---|---|
+| `GET /ui/bootstrap` | `/api/config` + `/api/feeds` + `/api/live` in one response: the first frame |
+| `GET /ui/stream` | `/api/stream`, relayed as it arrives |
+| `GET /ui/feeds` | `/api/feeds` (health refresh) |
+| `GET /ui/window/{feed}`, `/ui/history/{feed}/{id}`, `/ui/raw/{feed}/{sha}` | same paths under `/api` |
+| `POST /ui/export`, `GET /ui/tiles/traffic/{z}/{x}/{y}.png` | same paths under `/api` |
+
+The core API (`apps/api/main.py`, private; public only with `OPENWATCH_PUBLIC_API=true`):
 
 | Endpoint | |
 |---|---|

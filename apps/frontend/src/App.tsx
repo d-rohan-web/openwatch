@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getConfig, getFeeds, getHistory, getLive, getWindow, subscribe } from "./api";
+import { getBootstrap, getFeeds, getHistory, getWindow, subscribe } from "./api";
 import { inArea, inScope as within, MOVING_FEEDS, passOver, type Area } from "./features";
 import { MapView, type Overlays, type Scope } from "./MapView";
 import type { FeedMeta, Rec } from "./types";
@@ -53,13 +53,11 @@ export function App() {
   const [stateName, setStateName] = useState<string | null>(null);
 
   useEffect(() => {
-    const load = () => getFeeds().then(setFeeds).catch(() => {});
-    load();
+    const load = () => getFeeds().then(setFeeds).catch(() => {}); // health refresh; the first load is the bootstrap
     fetch("/geo/scope.geojson").then((r) => r.json()).then((g) => setIndiaArea(toArea(g.features[0].geometry))).catch(() => {});
     fetch("/geo/states.geojson").then((r) => r.json())
       .then((g) => setStates(g.features.map((f: any) => ({ name: f.properties.name, area: toArea(f.geometry) })))).catch(() => {});
-    getLive().then((l) => { setLive(l); setLastUpdate(Date.now()); }).catch(() => {});
-    getConfig().then((c) => setCfg({ traffic_tiles: c.traffic_tiles, global: c.global, export: c.export })).catch(() => {});
+    getBootstrap().then((b) => { setCfg(b.config); setFeeds(b.feeds); setLive(b.live); setLastUpdate(Date.now()); }).catch(() => {});
     const t = setInterval(load, 30000), c = setInterval(() => setNow(Date.now()), 1000);
     const unsub = subscribe((feed, records, health) => {
       setLive((l) => ({ ...l, [feed]: records }));

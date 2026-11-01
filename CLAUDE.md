@@ -2,6 +2,7 @@
 
 OpenWatch: an open-source, live situational-awareness map of India. Collectors pull public feeds, everything is
 archived as Parquet, a FastAPI service streams live state and exports slices, and a React + MapLibre UI displays it.
+The browser only talks to the backend for frontend (`apps/bff`, `/ui/*`); the core API (`apps/api`) stays private.
 Read `README.md` and `docs/architecture.md` first.
 
 ## Commands

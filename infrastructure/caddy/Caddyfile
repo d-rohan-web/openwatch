@@ -21,17 +21,34 @@
 		X-Content-Type-Options nosniff
 		Referrer-Policy same-origin
 		Strict-Transport-Security "max-age=31536000"
+		# map tiles, glyphs and imagery come from OpenFreeMap, NASA GIBS and AWS terrain; MapLibre runs workers from blob:
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://gibs.earthdata.nasa.gov; font-src 'self' data:; connect-src 'self' https://tiles.openfreemap.org https://gibs.earthdata.nasa.gov https://s3.amazonaws.com; worker-src 'self' blob:; child-src blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
 		-Server
 	}
 
 	# Prometheus scrapes services directly on the compose network
 	respond /metrics 404
 
-	handle /api/* {
-		reverse_proxy api:8000 {
+	# the browser only talks to the backend for frontend; the core API stays on the compose network
+	handle /ui/* {
+		reverse_proxy bff:8000 {
 			# SSE: deliver each event as it's written
 			flush_interval -1
 		}
+	}
+	# self-hosters who want the raw API (scripts, /api/docs): OPENWATCH_PUBLIC_API=true
+	@publicapi {
+		path /api/*
+		expression "{$OPENWATCH_PUBLIC_API:false}" == "true"
+	}
+	handle @publicapi {
+		reverse_proxy api:8000 {
+			flush_interval -1
+		}
+	}
+	handle /api/* {
+		respond 404
 	}
 	handle {
 		reverse_proxy frontend:80

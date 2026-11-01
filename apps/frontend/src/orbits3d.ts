@@ -2,9 +2,9 @@
 // the selected one a tether down to it and its orbit (all orbits with the "orbits" overlay). Clicks pick by screen distance. MapLibre's globe is a unit
 // sphere that ProjectionData.mainMatrix projects to screen, so positions are plain 3D points. Height is log-compressed
 // so GEO stays on screen: LEO, HEO and GEO read apart, but it is not to scale.
-import * as lucide from "lucide";
 import type maplibregl from "maplibre-gl";
 import { alongTrack } from "./features";
+import { ICONS } from "./icons";
 import type { Rec } from "./types";
 
 type V3 = [number, number, number];
@@ -57,8 +57,7 @@ void main() {
 
 /** The icon texture: the Lucide satellite drawn twice, a thick dark pass (outline) and the icon itself. */
 async function iconTexture(gl: WebGLRenderingContext, onReady: () => void) {
-  const node = (lucide as any).Satellite as [string, object, [string, Record<string, string>][]];
-  const body = node[2].map(([tag, attrs]) => `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+  const body = (ICONS.satellite[2] ?? []).map(([tag, attrs]) => `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
   const S = 96;
   const draw = async (width: number) => {
     const img = new Image();
