@@ -19,6 +19,12 @@ export type Overlays = { highways: boolean; railways: boolean; rivers: boolean; 
 const fitPad = (panel: boolean) => ({ top: 118, bottom: 108, left: 24, right: panel ? 404 : 24 });
 let FIT_PAD = fitPad(true);
 const FONT = ["Noto Sans Regular"];
+// Home: all of India, pulled back enough that the globe's curve and the satellites around it are in view.
+const HOME_ZOOM_OUT = 0.8;
+function home(m: maplibregl.Map, duration = 0) {
+  const cam = m.cameraForBounds(INDIA_FIT, { padding: FIT_PAD });
+  if (cam) m.easeTo({ center: cam.center, zoom: (cam.zoom ?? 4) - HOME_ZOOM_OUT, pitch: m.getPitch(), bearing: 0, duration });
+}
 
 type Props = {
   live: Record<string, Rec[]>; feeds: FeedMeta[]; on: Set<string>; traffic: boolean; scope: Scope; area: Area | null;
@@ -231,6 +237,7 @@ export function MapView(p: Props) {
     const hover = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: "320px" });
     let hoverState: string | number | undefined;
     m.on("load", () => {
+      home(m);
       m.setProjection({ type: "globe" });
       m.setSky({ "sky-color": "#05070d", "horizon-color": "#0b111f", "fog-color": "#05070d", "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] });
       for (const l of m.getStyle().layers) {
@@ -516,13 +523,13 @@ export function MapView(p: Props) {
   useEffect(() => whenReady((m) => {
     const india = p.scope === "india";
     m.setLayoutProperty("mask", "visibility", india ? "visible" : "none");
-    if (india) m.fitBounds(INDIA_FIT, { padding: FIT_PAD, duration: 600 });
+    if (india) home(m, 600);
   }), [p.scope]);
 
   // refit India when the panel opens/closes so it always sits in the visible part of the map
   useEffect(() => whenReady((m) => {
     FIT_PAD = fitPad(p.panelOpen);
-    if (p.scope === "india" && !p.state) m.fitBounds(INDIA_FIT, { padding: FIT_PAD, duration: 700, pitch: m.getPitch() });
+    if (p.scope === "india" && !p.state) home(m, 700);
   }), [p.panelOpen]);
 
   // selected state: highlight and fly to it; cleared → back to all of India
@@ -531,7 +538,7 @@ export function MapView(p: Props) {
     if (prevState.current) m.setFeatureState({ source: "states", id: prevState.current }, { selected: false });
     prevState.current = p.state;
     if (!p.state) {
-      if (p.scope === "india") m.fitBounds(INDIA_FIT, { padding: FIT_PAD, duration: 1200, pitch: m.getPitch() });
+      if (p.scope === "india") home(m, 1200);
       return;
     }
     m.setFeatureState({ source: "states", id: p.state }, { selected: true });
