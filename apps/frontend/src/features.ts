@@ -137,7 +137,7 @@ export function toFeatures(records: Rec[], section?: Section, area: Area | null 
     const icon = MOVERS.has(r.kind) && h !== null ? (r.kind === "ship" ? "openwatch-ship" : "openwatch-plane") : "";
     const props = { id: r.id, feed: r.feed, kind: r.kind, color: color(r, section), title: r.title, rot: h ?? 0,
       arrow: !!icon, icon, glyph: icon ? "" : glyphOf(r), alert: r.severity === "warning" || r.severity === "critical",
-      sev: r.severity ? SEVERITY_RANK[r.severity] : 0, minor: MINOR_KINDS.has(r.kind), fresh: freshQuake(r), mag: Number(r.attrs.mag ?? r.attrs.magnitude ?? 0) };
+      sev: r.severity ? SEVERITY_RANK[r.severity] : 0, minor: MINOR_KINDS.has(r.kind), past: !!r.attrs._past, fresh: freshQuake(r), mag: Number(r.attrs.mag ?? r.attrs.magnitude ?? 0) };
     const g = r.geometry;
     // ground tracks / forecast tracks are drawn as lines *and* the thing itself as a point
     const hideTrack = TRACK_ONLY_SELECTED.has(r.feed) && !allTracks && r.id !== selectedId && g?.type.endsWith("LineString");

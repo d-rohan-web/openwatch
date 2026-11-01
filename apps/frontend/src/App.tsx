@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { getConfig, getFeeds, getHistory, getLive, subscribe } from "./api";
-import { inArea, inScope as within, passOver, type Area } from "./features";
+import { getConfig, getFeeds, getHistory, getLive, getWindow, subscribe } from "./api";
+import { inArea, inScope as within, MOVING_FEEDS, passOver, type Area } from "./features";
 import { MapView, type Overlays, type Scope } from "./MapView";
 import type { FeedMeta, Rec } from "./types";
 import { CommandPalette } from "./ui/CommandPalette";
@@ -34,6 +34,9 @@ export function App() {
   const overlays: Overlays = { ...DEFAULT_OVERLAYS, ...overlaysRaw };
   const [scope, setScope] = useStored<Scope>("openwatch.scope", "india");
   const [threeD, setThreeD] = useStored("openwatch.3d", false);
+  const [day, setDay] = useStored("openwatch.day", false);
+  const [windowH, setWindowH] = useStored("openwatch.window", 0); // 0 = live only; 6/12/24 = also what the archive saw
+  const [past, setPast] = useState<Record<string, Rec[]>>({});
   const [tab, setTab] = useStored<Tab>("openwatch.tab", "alerts");
   const [collapsed, setCollapsed] = useStored("openwatch.collapsed", false);
   const [cfg, setCfg] = useState({ traffic_tiles: false, global: false, export: false });
@@ -73,11 +76,31 @@ export function App() {
   useEffect(() => { if (scope === "global" && !cfg.global && feeds.length) setScope("india"); }, [cfg.global, feeds.length]);
 
   // OpenSky and adsb.fi see many of the same aircraft: show adsb.fi's (fresher, richer) where both have it.
+  // Time window: add what each feed showed in the last N hours and isn't live any more, marked _past (drawn faded).
   const mapLive = useMemo(() => {
-    if (!live.opensky || !live.aircraft) return live;
-    const seen = new Set(live.aircraft.map((r) => r.id));
-    return { ...live, opensky: live.opensky.filter((r) => !seen.has(r.id)) };
-  }, [live]);
+    const out = { ...live };
+    if (live.opensky && live.aircraft) {
+      const seen = new Set(live.aircraft.map((r) => r.id));
+      out.opensky = live.opensky.filter((r) => !seen.has(r.id));
+    }
+    for (const [feed, recs] of Object.entries(past)) {
+      const seen = new Set((live[feed] ?? []).map((r) => r.id));
+      out[feed] = [...(live[feed] ?? []), ...recs.filter((r) => !seen.has(r.id)).map((r) => ({ ...r, attrs: { ...r.attrs, _past: true } }))];
+    }
+    return out;
+  }, [live, past]);
+
+  // moving things (aircraft, ships, satellites) and market prices stay live-only: hours of them is clutter, not situation
+  const windowFeeds = feeds.filter((f) => !MOVING_FEEDS.has(f.id) && f.section !== "economy" && f.health?.state !== "NEEDS_KEY").map((f) => f.id).join();
+  useEffect(() => {
+    setPast({});
+    if (!windowH || !windowFeeds) return;
+    const load = () => Promise.all(windowFeeds.split(",").map((f) => getWindow(f, windowH).then((r) => [f, r] as const).catch(() => [f, []] as const)))
+      .then((pairs) => setPast(Object.fromEntries(pairs)));
+    load();
+    const t = setInterval(load, 5 * 60e3);
+    return () => clearInterval(t);
+  }, [windowH, windowFeeds]);
 
   const off = offStored ?? feeds.map((f) => f.id).filter((id) => !OVERVIEW.includes(id));
   const on = useMemo(() => new Set(feeds.map((f) => f.id).filter((id) => !off.includes(id))), [feeds, offStored]);
@@ -124,11 +147,11 @@ export function App() {
   return (
     <div className={`shell ${collapsed ? "panel-collapsed" : ""}`}>
       <MapView live={mapLive} feeds={feeds} on={on} traffic={traffic && cfg.traffic_tiles} scope={scope} area={area}
-        overlays={overlays} threeD={threeD} panelOpen={!collapsed} state={stateName} onState={setStateName} selected={sel}
+        overlays={overlays} threeD={threeD} day={day} panelOpen={!collapsed} state={stateName} onState={setStateName} selected={sel}
         select={(feed, id) => { setSel({ feed, id }); setHistory([]); setTab(feed === "satellites" ? "sats" : "alerts"); setCollapsed(false); }}
         history={history} flyTo={flyTo} onBounds={setBounds} />
       <TopBar scope={scope} setScope={setScope} globalReady={cfg.global} feeds={feeds} now={now} lastUpdate={lastUpdate}
-        threeD={threeD} setThreeD={setThreeD}
+        threeD={threeD} setThreeD={setThreeD} day={day} setDay={setDay} windowH={windowH} setWindowH={setWindowH}
         openSearch={() => setPalette(true)} openFeeds={() => { setTab("feeds"); setCollapsed(false); }} openNotice={() => setNotice(true)} />
       <LayerDock feeds={feeds} live={mapLive} on={on} setOn={setOn} extras={extras} now={now} />
       {stateName && <StateCard name={stateName} records={inState} feeds={feeds} now={now} back={() => setStateName(null)} pick={pick} />}

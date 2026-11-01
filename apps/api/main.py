@@ -159,6 +159,18 @@ async def history(feed: str, id: str, hours: float = Query(6, gt=0, le=24 * 7)):
         con.close()
 
 
+@app.get("/api/window/{feed}")
+async def window(feed: str, hours: float = Query(6, gt=0, le=24)):
+    """The map's time window: the latest version of every located record a feed showed in the last few hours."""
+    await known([feed])
+    con, sql, params = archive.query([feed], start=datetime.now(UTC) - timedelta(hours=hours), located_only=True)
+    sql = f"SELECT * FROM ({sql}) QUALIFY row_number() OVER (PARTITION BY id ORDER BY fetched_at DESC) = 1 LIMIT 5000"
+    try:
+        return {"feed": feed, "hours": hours, "records": await asyncio.to_thread(_rows, con, sql, params)}
+    finally:
+        con.close()
+
+
 @app.get("/api/records")
 async def records(feed: list[str] = Query(...), start: datetime | None = None, end: datetime | None = None,
                   bbox: str | None = None, limit: int = Query(1000, le=10000),

@@ -21,7 +21,7 @@ const FONT = ["Noto Sans Regular"];
 
 type Props = {
   live: Record<string, Rec[]>; feeds: FeedMeta[]; on: Set<string>; traffic: boolean; scope: Scope; area: Area | null;
-  overlays: Overlays; threeD: boolean; panelOpen: boolean; state: string | null; onState: (name: string | null) => void;
+  overlays: Overlays; threeD: boolean; day: boolean; panelOpen: boolean; state: string | null; onState: (name: string | null) => void;
   select: (feed: string, id: string) => void; selected: { feed: string; id: string } | null; history: Rec[];
   flyTo: { lon: number; lat: number; zoom?: number; n: number } | null;
   onBounds: (b: [number, number, number, number]) => void;
@@ -92,6 +92,8 @@ const CLUSTER = new Set(["navarea8", "airports", "airport_infra", "defence_sites
   "incois", "city_weather", "cwc_rivers", "launches", "ioda", "cpcb_aqi", "firms", "road_incidents", "volcanoes"]);
 const NOT_CLUSTER = ["!", ["has", "point_count"]] as any;
 const MINOR = ["boolean", ["get", "minor"], false] as any;
+// records only from the time window (no longer live) are drawn faded
+const PAST_OP = ["case", ["get", "past"], 0.4, 0.95] as any;
 const HAS_GLYPH = ["!=", ["get", "glyph"], ""] as any;
 // Zoom from which points become icon badges; fixed places worth seeing nationwide get them early.
 const BADGE_ZOOM: Record<string, number> = { satellites: 0, airports: 3, defence_sites: 3, nuclear: 3, border_posts: 4, launches: 3, cwc_rivers: 4 };
@@ -123,11 +125,11 @@ function addFeedLayers(map: maplibregl.Map, id: string, color: string) {
       "circle-stroke-color": ["step", ["zoom"], "#05070d", bz, ["case", HAS_GLYPH, ["get", "color"], "#05070d"]],
       "circle-stroke-width": ["step", ["zoom"], 0.8, bz, ["case", HAS_GLYPH, 1.4, 0.8]],
       // minor items (small airstrips, heliports) only once zoomed in
-      "circle-opacity": ["step", ["zoom"], ["case", MINOR, 0, 0.95], 7, 0.95], "circle-stroke-opacity": ["step", ["zoom"], ["case", MINOR, 0, 1], 7, 1] } });
+      "circle-opacity": ["step", ["zoom"], ["case", MINOR, 0, PAST_OP], 7, PAST_OP], "circle-stroke-opacity": ["step", ["zoom"], ["case", MINOR, 0, 1], 7, 1] } });
   map.addLayer({ id: `${id}-glyph`, type: "symbol", source: src, minzoom: bz, filter: ["all", isPoint, NOT_CLUSTER, ["!", ["get", "arrow"]], HAS_GLYPH],
     layout: { "icon-image": ["get", "glyph"], "icon-allow-overlap": true, "icon-ignore-placement": true,
       "icon-size": ["interpolate", ["linear"], ["zoom"], bz, 0.42, 9, 0.6] },
-    paint: { "icon-color": ["get", "color"] } });
+    paint: { "icon-color": ["get", "color"], "icon-opacity": ["case", ["get", "past"], 0.45, 1] } });
   const isCluster = ["has", "point_count"] as any;
   const sevColor = ["match", ["get", "sev"], 3, "#ff4d4f", 2, "#ff8c1a", 1, "#ffd23f", color] as any;
   map.addLayer({ id: `${id}-cluster`, type: "circle", source: src, filter: isCluster,
@@ -246,6 +248,11 @@ export function MapView(p: Props) {
         paint: { "text-color": "#7dd3fc", "text-halo-color": "#02030a", "text-halo-width": 1.3 } });
       m.addSource("traffic", { type: "raster", tiles: ["/api/tiles/traffic/{z}/{x}/{y}.png"], tileSize: 256, attribution: "Traffic © TomTom" });
       m.addLayer({ id: "traffic", type: "raster", source: "traffic", layout: { visibility: "none" }, paint: { "raster-opacity": 0.75 } });
+      // Day: NASA Blue Marble imagery (public domain, GIBS) under roads and labels; Night: the dark vector basemap alone
+      m.addSource("bluemarble", { type: "raster", tileSize: 256, maxzoom: 8, attribution: "Imagery: NASA Blue Marble (GIBS)",
+        tiles: ["https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg"] });
+      m.addLayer({ id: "day", type: "raster", source: "bluemarble", layout: { visibility: props.current.day ? "visible" : "none" },
+        paint: { "raster-opacity": 0.9 } }, m.getStyle().layers.find((l) => l.type !== "background" && l.type !== "fill")?.id);
       m.addSource("mask", { type: "geojson", data: "/geo/mask.geojson" });
       m.addLayer({ id: "mask", type: "fill", source: "mask", paint: { "fill-color": "#020308", "fill-opacity": 0.72 } });
       m.addSource("neighbours", { type: "geojson", data: "/geo/neighbours.geojson", attribution: "Borders: Natural Earth" });
@@ -501,6 +508,11 @@ export function MapView(p: Props) {
     const b = stateBox.current[p.state];
     if (b) m.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { ...FIT_PAD, top: 170 }, duration: 1400, essential: true, maxZoom: 9, pitch: m.getPitch() });
   }), [p.state]);
+
+  useEffect(() => whenReady((m) => {
+    m.setLayoutProperty("day", "visibility", p.day ? "visible" : "none");
+    m.setPaintProperty("mask", "fill-opacity", p.day ? 0.4 : 0.72);
+  }), [p.day]);
 
   // 3D: terrain + tilt + extruded buildings; 2D: flat and north-up
   useEffect(() => whenReady((m) => {

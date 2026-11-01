@@ -12,6 +12,8 @@ export const getConfig = () => get<{ traffic_tiles: boolean; global: boolean; ex
 export const getHistory = (feed: string, id: string, hours = 6) =>
   get<{ records: Rec[] }>(`/api/history/${encodeURIComponent(feed)}/${encodeURIComponent(id)}?hours=${hours}`)
     .then((d) => d.records);
+export const getWindow = (feed: string, hours: number) =>
+  get<{ records: Rec[] }>(`/api/window/${encodeURIComponent(feed)}?hours=${hours}`).then((d) => d.records);
 export const rawUrl = (feed: string, sha: string) => `/api/raw/${encodeURIComponent(feed)}/${sha}`;
 
 // One EventSource for the app; reconnects by itself (server sends retry: 3000).
