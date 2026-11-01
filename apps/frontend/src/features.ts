@@ -4,7 +4,7 @@ import { SEVERITY_COLOR, SEVERITY_RANK, type Rec, type Section } from "./types";
 
 const FEED_COLOR: Record<string, string> = { airports: "#64748b", restricted_areas: "#f472b6", aai_notam: "#facc15", faa_notam: "#facc15" };
 const KIND_COLOR: Record<string, string> = {
-  military: "#ff5c8a", station: "#ffffff", indian: "#ff9933", navic: "#ff9933", fire: "#ff5a1f", firing: "#ff5c8a", defence: "#ff5c8a",
+  aircraft: "#eef2f7", military: "#ff5c8a", station: "#ffffff", indian: "#ff9933", navic: "#ff9933", fire: "#ff5a1f", firing: "#ff5c8a", defence: "#ff5c8a",
 };
 const MOVERS = new Set(["aircraft", "military", "ship"]); // drawn as icons rotated to their heading
 export const MOVING_FEEDS = new Set(["aircraft", "opensky", "ais", "satellites"]);
@@ -108,11 +108,19 @@ export function passOver(r: Rec, area: Area | null, now: number): Pass | null {
 export const inArea = (lon: number, lat: number, area: Area) =>
   area.some(([outer, ...holes]) => inRing(lon, lat, outer) && !holes.some((h) => inRing(lon, lat, h)));
 /** Records with no position always pass (press releases, space weather): they aren't somewhere else. */
-/** Satellites are never cut by the India view: Indian ones matter wherever they are (NavIC sits over the ocean). */
-export const inScope = (r: Rec, area: Area | null) => !area || r.lon === null || r.feed === "satellites" || inArea(r.lon, r.lat!, area);
+/** Satellites are never cut by the India view: Indian ones matter wherever they are (NavIC sits over the ocean).
+ *  Flights show over the whole region: Arabian Sea, Bay of Bengal and Indian Ocean (REGION_BBOX in packages/common/geo.py). */
+const REGION_BBOX = [40, -15, 105, 42];
+const FLIGHT_FEEDS = new Set(["aircraft", "opensky"]);
+export const inScope = (r: Rec, area: Area | null) => !area || r.lon === null || r.feed === "satellites" || inArea(r.lon, r.lat!, area) ||
+  FLIGHT_FEEDS.has(r.feed) && r.lon >= REGION_BBOX[0] && r.lat! >= REGION_BBOX[1] && r.lon <= REGION_BBOX[2] && r.lat! <= REGION_BBOX[3];
 
 // Tracks (satellite ground tracks, forecast paths of moving things) only for the selected record: all at once is clutter.
 const TRACK_ONLY_SELECTED = new Set(["satellites"]);
+
+/** A quake from the last 30 minutes: drawn with ripples. */
+export const freshQuake = (r: Rec, now = Date.now()) =>
+  r.kind === "earthquake" && !!r.observed_at && now - Date.parse(r.observed_at) < 30 * 60e3;
 
 /** Map relevance: old small quakes are history, not situation (they stay in the archive and the alert list rules). */
 export function onMap(r: Rec, now = Date.now()) {
@@ -129,7 +137,7 @@ export function toFeatures(records: Rec[], section?: Section, area: Area | null 
     const icon = MOVERS.has(r.kind) && h !== null ? (r.kind === "ship" ? "openwatch-ship" : "openwatch-plane") : "";
     const props = { id: r.id, feed: r.feed, kind: r.kind, color: color(r, section), title: r.title, rot: h ?? 0,
       arrow: !!icon, icon, glyph: icon ? "" : glyphOf(r), alert: r.severity === "warning" || r.severity === "critical",
-      sev: r.severity ? SEVERITY_RANK[r.severity] : 0, minor: MINOR_KINDS.has(r.kind) };
+      sev: r.severity ? SEVERITY_RANK[r.severity] : 0, minor: MINOR_KINDS.has(r.kind), fresh: freshQuake(r), mag: Number(r.attrs.mag ?? r.attrs.magnitude ?? 0) };
     const g = r.geometry;
     // ground tracks / forecast tracks are drawn as lines *and* the thing itself as a point
     const hideTrack = TRACK_ONLY_SELECTED.has(r.feed) && !allTracks && r.id !== selectedId && g?.type.endsWith("LineString");

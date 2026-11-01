@@ -84,7 +84,7 @@ async function glyphImage(name: string): Promise<ImageData | null> {
   return g.getImageData(0, 0, 48, 48);
 }
 
-const LAYERS = ["fill", "line", "glow", "circle", "glyph", "icon", "cluster", "count"] as const;
+const LAYERS = ["fill", "line", "ripple", "glow", "circle", "glyph", "icon", "cluster", "count"] as const;
 // District-level alert feeds are drawn as shaded districts (max severity), not as hundreds of centroid dots.
 export const DISTRICT_FEEDS = new Set(["imd_warnings", "imd_nowcast", "sachet"]);
 // Dense, static point layers merge into count bubbles when zoomed out.
@@ -110,36 +110,39 @@ function addFeedLayers(map: maplibregl.Map, id: string, color: string) {
   map.addLayer({ id: `${id}-line`, type: "line", source: src, filter: ["any", isPoly, isLine],
     paint: { "line-color": ["get", "color"], "line-width": ["case", isLine, 1, 1.3], "line-opacity": ["case", isLine, id === "satellites" ? 0.35 : 0.45, 0.85],
       ...(id === "satellites" ? { "line-dasharray": [3, 2] } : {}) } }, before);
+  // fresh quakes (< 30 min): rings spreading out, sized by magnitude; animated in the ripple loop below
+  map.addLayer({ id: `${id}-ripple`, type: "circle", source: src, filter: ["all", isPoint, NOT_CLUSTER, ["==", ["get", "fresh"], true]],
+    paint: { "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": ["get", "color"], "circle-stroke-width": 1.6 } });
   // soft halo under alert points so severity reads at a glance
   map.addLayer({ id: `${id}-glow`, type: "circle", source: src, filter: ["all", isPoint, NOT_CLUSTER, ["!", ["get", "arrow"]], ["==", ["get", "sev"], 3]],
     paint: { "circle-color": ["get", "color"], "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 11, 8, 20], "circle-opacity": 0.2, "circle-blur": 0.6 } });
   // a coloured dot when zoomed out; from zoom 5 a dark badge with a coloured ring and the kind's glyph inside
   map.addLayer({ id: `${id}-circle`, type: "circle", source: src, filter: ["all", isPoint, NOT_CLUSTER, ["!", ["get", "arrow"]]],
     paint: { "circle-color": ["step", ["zoom"], ["get", "color"], bz, ["case", HAS_GLYPH, "#0a0f1c", ["get", "color"]]],
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 3, bz, ["case", HAS_GLYPH, 8.5, 3.5], 9, ["case", HAS_GLYPH, 13, 6]],
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 4, bz, ["case", HAS_GLYPH, 11, 4.5], 9, ["case", HAS_GLYPH, 16, 7.5]],
       "circle-stroke-color": ["step", ["zoom"], "#05070d", bz, ["case", HAS_GLYPH, ["get", "color"], "#05070d"]],
       "circle-stroke-width": ["step", ["zoom"], 0.8, bz, ["case", HAS_GLYPH, 1.4, 0.8]],
       // minor items (small airstrips, heliports) only once zoomed in
       "circle-opacity": ["step", ["zoom"], ["case", MINOR, 0, 0.95], 7, 0.95], "circle-stroke-opacity": ["step", ["zoom"], ["case", MINOR, 0, 1], 7, 1] } });
   map.addLayer({ id: `${id}-glyph`, type: "symbol", source: src, minzoom: bz, filter: ["all", isPoint, NOT_CLUSTER, ["!", ["get", "arrow"]], HAS_GLYPH],
     layout: { "icon-image": ["get", "glyph"], "icon-allow-overlap": true, "icon-ignore-placement": true,
-      "icon-size": ["interpolate", ["linear"], ["zoom"], bz, 0.32, 9, 0.48] },
+      "icon-size": ["interpolate", ["linear"], ["zoom"], bz, 0.42, 9, 0.6] },
     paint: { "icon-color": ["get", "color"] } });
   const isCluster = ["has", "point_count"] as any;
   const sevColor = ["match", ["get", "sev"], 3, "#ff4d4f", 2, "#ff8c1a", 1, "#ffd23f", color] as any;
   map.addLayer({ id: `${id}-cluster`, type: "circle", source: src, filter: isCluster,
     paint: { "circle-color": "#0a0f1c", "circle-stroke-color": sevColor, "circle-stroke-width": 1.2, "circle-opacity": 0.9,
-      "circle-radius": ["step", ["get", "point_count"], 8.5, 10, 10.5, 50, 12.5, 200, 14.5] } });
+      "circle-radius": ["step", ["get", "point_count"], 11, 10, 13.5, 50, 16, 200, 18.5] } });
   // a group shows its layer's icon in the ring, with the count as a small superscript
   map.addLayer({ id: `${id}-count`, type: "symbol", source: src, filter: isCluster,
-    layout: { ...(FEED_ICON[id] ? { "icon-image": FEED_ICON[id], "icon-size": 0.3, "icon-allow-overlap": true } : {}),
+    layout: { ...(FEED_ICON[id] ? { "icon-image": FEED_ICON[id], "icon-size": 0.38, "icon-allow-overlap": true } : {}),
       "text-field": ["get", "point_count_abbreviated"], "text-font": FONT, "text-size": 9, "text-allow-overlap": true,
       ...(FEED_ICON[id] ? { "text-offset": [1.15, -1.05], "text-anchor": "center" } : {}) },
     paint: { "icon-color": sevColor, "text-color": "#e7ecf4", "text-halo-color": "#0a0f1c", "text-halo-width": 2.2 } });
   map.addLayer({ id: `${id}-icon`, type: "symbol", source: src, filter: ["all", isPoint, ["get", "arrow"]],
     layout: { "icon-image": ["get", "icon"], "icon-rotate": ["get", "rot"], "icon-rotation-alignment": "map",
       "icon-pitch-alignment": "map", "icon-allow-overlap": true, "icon-ignore-placement": true,
-      "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.55, 6, 0.72, 10, 1.05] },
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 6, 0.92, 10, 1.3] },
     paint: { "icon-color": ["get", "color"], "icon-halo-color": "#02040a", "icon-halo-width": 1.2 } });
 }
 
@@ -438,6 +441,25 @@ export function MapView(p: Props) {
       drawPass(m, sel?.feed === "satellites" ? live.satellites?.find((r) => r.id === sel.id) : undefined, now);
     }), 1000);
     return () => clearInterval(t);
+  }, []);
+
+  // quake ripples: one 2.4 s cycle shared by every fresh quake (M5 grows to ~50 px)
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
+      const m = map.current;
+      if (!ready.current || !m) return;
+      const t = (performance.now() % 2400) / 2400;
+      for (const feed of ["ncs_quakes", "usgs_quakes"]) {
+        const id = `${feed}-ripple`;
+        if (!m.getLayer(id)) continue;
+        m.setPaintProperty(id, "circle-radius", ["+", 6, ["*", 9 * t, ["max", ["get", "mag"], 2]]]);
+        m.setPaintProperty(id, "circle-stroke-opacity", 1 - t);
+      }
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   useEffect(() => whenReady((m) => {
