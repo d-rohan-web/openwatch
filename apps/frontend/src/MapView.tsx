@@ -5,9 +5,9 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
 import * as lucide from "lucide";
-import { alongTrack, color, FEED_ICON, feedColor, GLYPHS, inArea, inScope, MOVING_FEEDS, toFeatures, trackStep, type Area } from "./features";
+import { alongTrack, FEED_ICON, feedColor, GLYPHS, inArea, inScope, MOVING_FEEDS, toFeatures, trackStep, type Area } from "./features";
 import { SEVERITY_RANK } from "./types";
-import { SAT_3D_MAX_ZOOM, satelliteLayer } from "./orbits3d";
+import { missionColor, SAT_3D_MAX_ZOOM, satelliteLayer } from "./orbits3d";
 import { INDIA_FIT } from "./sections";
 import type { FeedMeta, Rec } from "./types";
 
@@ -225,7 +225,7 @@ export function MapView(p: Props) {
     // satellites floating at (compressed) altitude above their ground point; the selected one's orbit in 3D
     const satLayer = satelliteLayer(() => {
       const c = props.current;
-      return { sats: c.on.has("satellites") ? c.live.satellites ?? [] : [], color: (r) => color(r, "space"),
+      return { sats: c.on.has("satellites") ? c.live.satellites ?? [] : [], color: missionColor,
         selected: c.selected?.feed === "satellites" ? c.selected.id : undefined, allOrbits: c.overlays.orbits };
     });
     const hover = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: "320px" });

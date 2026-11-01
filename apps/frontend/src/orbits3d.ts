@@ -2,6 +2,7 @@
 // the selected one a tether down to it and its orbit (all orbits with the "orbits" overlay). Clicks pick by screen distance. MapLibre's globe is a unit
 // sphere that ProjectionData.mainMatrix projects to screen, so positions are plain 3D points. Height is log-compressed
 // so GEO stays on screen: LEO, HEO and GEO read apart, but it is not to scale.
+import * as lucide from "lucide";
 import type maplibregl from "maplibre-gl";
 import { alongTrack } from "./features";
 import type { Rec } from "./types";
@@ -44,22 +45,50 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
 
 const VS = `attribute vec3 a_pos; attribute vec4 a_col; attribute float a_size; uniform mat4 u_m; varying vec4 v_col;
 void main() { gl_Position = u_m * vec4(a_pos, 1.0); gl_PointSize = a_size; v_col = a_col; }`;
-// Points are drawn as a satellite glyph: a body, a strut and two solar panels, with a dark outline so they read on any map.
-const FS = `precision mediump float; varying vec4 v_col; uniform float u_round;
-float sat(vec2 q, float g) {
-  vec2 a = abs(q);
-  float body = step(max(a.x, a.y), 0.15 + g);
-  float panel = step(a.y, 0.17 + g) * step(0.22 - g, a.x) * step(a.x, 0.45 + g);
-  float strut = step(a.y, 0.035 + g) * step(a.x, 0.22);
-  return max(body, max(panel, strut));
-}
+// Points are drawn as the Lucide "satellite" icon from a texture: R = the icon, A = icon + a dark outline.
+const FS = `precision mediump float; varying vec4 v_col; uniform float u_round; uniform sampler2D u_tex;
 void main() {
   if (u_round < 0.5) { gl_FragColor = vec4(v_col.rgb * v_col.a, v_col.a); return; }
-  vec2 q = gl_PointCoord - 0.5;
-  if (sat(q, 0.0) > 0.5) gl_FragColor = vec4(v_col.rgb, 1.0);
-  else if (sat(q, 0.045) > 0.5) gl_FragColor = vec4(0.008, 0.016, 0.04, 0.9);
-  else discard;
+  vec4 t = texture2D(u_tex, gl_PointCoord);
+  if (t.a < 0.02) discard;
+  vec3 c = mix(vec3(0.01, 0.02, 0.04), v_col.rgb, clamp(t.r / t.a, 0.0, 1.0));
+  gl_FragColor = vec4(c * t.a, t.a);
 }`;
+
+/** The icon texture: the Lucide satellite drawn twice, a thick dark pass (outline) and the icon itself. */
+async function iconTexture(gl: WebGLRenderingContext, onReady: () => void) {
+  const node = (lucide as any).Satellite as [string, object, [string, Record<string, string>][]];
+  const body = node[2].map(([tag, attrs]) => `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+  const S = 96;
+  const draw = async (width: number) => {
+    const img = new Image();
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" ` +
+      `viewBox="-3 -3 30 30" fill="none" stroke="white" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`);
+    await img.decode();
+    const g = Object.assign(document.createElement("canvas"), { width: S, height: S }).getContext("2d")!;
+    g.drawImage(img, 0, 0);
+    return g.getImageData(0, 0, S, S).data;
+  };
+  const [halo, icon] = [await draw(5.5), await draw(2.2)];
+  const px = new Uint8Array(S * S * 4);
+  for (let i = 0; i < px.length; i += 4) { px[i] = icon[i + 3]; px[i + 3] = Math.max(halo[i + 3] * 0.85, icon[i + 3]); }
+  const tex = gl.createTexture()!;
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, S, S, 0, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]])
+    gl.texParameteri(gl.TEXTURE_2D, k, v);
+  texture = tex;
+  onReady();
+}
+let texture: WebGLTexture | null = null;
+
+/** Colour by mission, so the sky reads at a glance: NavIC orange, imaging teal, comms purple, weather blue, stations white. */
+const MISSION_COLOR: [RegExp, string][] = [
+  [/navigation/i, "#ff9933"], [/earth observation/i, "#2dd4bf"], [/communication/i, "#b69cff"],
+  [/weather|ocean/i, "#38bdf8"], [/science|technology/i, "#facc15"],
+];
+export const missionColor = (r: Rec) =>
+  r.kind === "station" ? "#ffffff" : MISSION_COLOR.find(([re]) => re.test(String(r.attrs.mission ?? "")))?.[1] ?? "#cbd5e1";
 
 type State = { sats: Rec[]; color: (r: Rec) => string; selected?: string; allOrbits: boolean };
 
@@ -81,6 +110,7 @@ export function satelliteLayer(get: () => State): maplibregl.CustomLayerInterfac
       gl.linkProgram(prog);
       buf = gl.createBuffer()!;
       if ("createVertexArray" in gl) vao = gl.createVertexArray();
+      iconTexture(gl, () => m.triggerRepaint()).catch(() => {});
     },
     render(gl, args) {
       const pd = args.defaultProjectionData;
@@ -102,7 +132,7 @@ export function satelliteLayer(get: () => State): maplibregl.CustomLayerInterfac
         const h = shownAlt(Number(r.attrs.alt_km) || 500), c = rgb(color(r)), sel = r.id === selected;
         const top = spherePos(g[0], g[1], h), foot = spherePos(g[0], g[1], 0.002);
         if (visible(eye, top)) {
-          vert(points, top, c, 1, (sel ? 36 : 26) * devicePixelRatio); // gl_PointSize is in device pixels
+          vert(points, top, c, 1, (sel ? 40 : 28) * devicePixelRatio); // gl_PointSize is in device pixels
           hits.push({ id: r.id, ...toScreen(top) });
           if (sel && visible(eye, foot)) { vert(lines, top, c, 0.8); vert(lines, foot, c, 0.8); }
         }
@@ -128,7 +158,11 @@ export function satelliteLayer(get: () => State): maplibregl.CustomLayerInterfac
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       const round = gl.getUniformLocation(prog, "u_round");
       gl.uniform1f(round, 0); gl.drawArrays(gl.LINES, 0, lines.length / 8);
-      gl.uniform1f(round, 1); gl.drawArrays(gl.POINTS, lines.length / 8, points.length / 8);
+      if (texture) {
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.uniform1i(gl.getUniformLocation(prog, "u_tex"), 0);
+        gl.uniform1f(round, 1); gl.drawArrays(gl.POINTS, lines.length / 8, points.length / 8);
+      }
       if (vao) g2.bindVertexArray(null);
     },
   };
