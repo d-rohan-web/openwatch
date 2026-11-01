@@ -11,7 +11,7 @@ export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setTh
   const running = feeds.filter((f) => f.health?.state !== "NEEDS_KEY");
   const ok = running.filter((f) => f.health?.state === "OK").length;
   const bad = running.filter((f) => f.health?.state === "DOWN" || f.health?.state === "DEGRADED").length;
-  const fresh = now - lastUpdate < 30000;
+  const fresh = now - lastUpdate < 120000; // unchanged feeds no longer resend, so gaps of a minute are normal
   return (
     <header className="overlay glass topbar">
       <button className="brand" onClick={openNotice} title="About OpenWatch: purpose and notice" aria-label="About OpenWatch">
@@ -49,7 +49,7 @@ export function TopBar({ scope, setScope, globalReady, feeds, now, threeD, setTh
       <button className="search-trigger" onClick={openSearch} aria-label="Search">
         <Search size={15} /><span className="grow">Search places, callsigns, alerts…</span><kbd>⌘K</kbd>
       </button>
-      <span className="live" style={{ color: fresh ? "var(--live)" : "var(--muted)" }} title={fresh ? "Receiving updates" : "No update in 30 s"}>
+      <span className="live" style={{ color: fresh ? "var(--live)" : "var(--muted)" }} title={fresh ? "Receiving updates" : "No update in 2 min"}>
         <i className="pulse" /> {fresh ? "LIVE" : "IDLE"}
       </span>
       <button className="health-pill" onClick={openFeeds} title="Feed health">

@@ -38,3 +38,9 @@ def test_window_returns_latest_version_per_record(monkeypatch, tmp_path):
     recs = TestClient(main.app).get("/api/window/q", params={"hours": 6}).json()["records"]
     assert sorted((r["id"], r["attrs"]["sev"]) for r in recs) == [("a", 2), ("b", 1)]  # latest a; unlocated c left out
     assert TestClient(main.app).get("/api/window/q", params={"hours": 48}).status_code == 422
+
+
+def test_stream_events_leave_records_out_when_only_health_changed():
+    full = main.sse_event("usgs_quakes", '[{"id":"q1"}]', '{"state":"OK"}')
+    assert full == 'event: feed\ndata: {"feed":"usgs_quakes","records":[{"id":"q1"}],"health":{"state":"OK"}}\n\n'
+    assert main.sse_event("usgs_quakes", None, None) == 'event: feed\ndata: {"feed":"usgs_quakes","health":null}\n\n'

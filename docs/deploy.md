@@ -49,8 +49,9 @@ Remove everything: `gcloud compute instances delete openwatch --zone us-central1
 
 ### Free-tier notes
 
-- Egress: 1 GB/month free from North America; JSON responses are compressed, but every open browser streams live
-  updates (mostly aircraft, roughly 150–200 MB/day per viewer). A few viewers stay cheap; check Billing → Reports.
+- Egress: 1 GB/month free from North America. A first visit is about 1.5 MB (map files and app, compressed; the app
+  code is then cached for a year), and an open tab streams about 2 MB/hour of live updates (gzipped, only what
+  changed, mostly aircraft). A tab hidden for 2 minutes stops streaming. Check Billing → Reports.
 - Keys: add them to `/opt/openwatch/.env` on the VM (never commit them).
 
 ## Any other Linux server

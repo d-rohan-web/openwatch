@@ -63,3 +63,24 @@ def test_only_ui_routes_exist(monkeypatch):
     for path in ("/api/live", "/ui/records", "/docs", "/openapi.json", "/ui/../api/live"):
         assert c.get(path).status_code == 404, path
     assert seen == []  # nothing was forwarded
+
+
+def test_stream_is_gzipped_per_chunk_when_the_browser_accepts_it(monkeypatch):
+    import zlib
+
+    class Events(httpx.AsyncByteStream):  # a real stream (bytes content would be read eagerly)
+        async def __aiter__(self):
+            yield b"retry: 3000\n\n"
+            yield b'event: feed\ndata: {"feed":"q","health":null}\n\n'
+
+    def sse(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, stream=Events())
+    fresh = lambda: monkeypatch.setattr(main, "client", httpx.AsyncClient(base_url="http://api", transport=httpx.MockTransport(sse)))  # noqa: E731
+    fresh()
+    with TestClient(main.app).stream("GET", "/ui/stream", headers={"accept-encoding": "gzip"}) as r:
+        assert r.headers["content-encoding"] == "gzip" and r.headers["content-type"].startswith("text/event-stream")
+        body = zlib.decompress(b"".join(r.iter_raw()), 31)
+    assert body.endswith(b'"health":null}\n\n')
+    fresh()
+    with TestClient(main.app).stream("GET", "/ui/stream", headers={"accept-encoding": "identity"}) as r:
+        assert "content-encoding" not in r.headers and b"".join(r.iter_raw()).startswith(b"retry: 3000")

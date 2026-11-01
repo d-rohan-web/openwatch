@@ -57,13 +57,14 @@ export function App() {
     fetch("/geo/scope.geojson").then((r) => r.json()).then((g) => setIndiaArea(toArea(g.features[0].geometry))).catch(() => {});
     fetch("/geo/states.geojson").then((r) => r.json())
       .then((g) => setStates(g.features.map((f: any) => ({ name: f.properties.name, area: toArea(f.geometry) })))).catch(() => {});
-    getBootstrap().then((b) => { setCfg(b.config); setFeeds(b.feeds); setLive(b.live); setLastUpdate(Date.now()); }).catch(() => {});
+    const boot = () => getBootstrap().then((b) => { setCfg(b.config); setFeeds(b.feeds); setLive(b.live); setLastUpdate(Date.now()); }).catch(() => {});
+    boot();
     const t = setInterval(load, 30000), c = setInterval(() => setNow(Date.now()), 1000);
     const unsub = subscribe((feed, records, health) => {
-      setLive((l) => ({ ...l, [feed]: records }));
+      if (records) setLive((l) => ({ ...l, [feed]: records }));
       setLastUpdate(Date.now());
       if (health) setFeeds((fs) => fs.map((f) => (f.id === feed ? { ...f, health } : f)));
-    });
+    }, boot);
     const key = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette((v) => !v); }
     };

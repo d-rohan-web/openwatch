@@ -18,14 +18,27 @@ export const getWindow = (feed: string, hours: number) =>
   get<{ records: Rec[] }>(`/ui/window/${encodeURIComponent(feed)}?hours=${hours}`).then((d) => d.records);
 export const rawUrl = (feed: string, sha: string) => `/ui/raw/${encodeURIComponent(feed)}/${sha}`;
 
-// One EventSource for the app; reconnects by itself (server sends retry: 3000).
-export function subscribe(on: (feed: string, records: Rec[], health: Health | null) => void) {
-  const es = new EventSource("/ui/stream");
-  es.addEventListener("feed", (e) => {
-    const d = JSON.parse((e as MessageEvent).data);
-    on(d.feed, d.records, d.health);
-  });
-  return () => es.close();
+// One EventSource for the app; reconnects by itself (server sends retry: 3000). `records` is undefined when only a
+// feed's health changed. A tab hidden for 2 min closes the stream (no bandwidth for nobody); when it's visible again
+// the stream reopens and `resume` reloads the current state once.
+const HIDDEN_CLOSE_MS = 2 * 60e3;
+export function subscribe(on: (feed: string, records: Rec[] | undefined, health: Health | null) => void, resume: () => void) {
+  let es: EventSource | null = null, timer = 0;
+  const open = () => {
+    es = new EventSource("/ui/stream");
+    es.addEventListener("feed", (e) => {
+      const d = JSON.parse((e as MessageEvent).data);
+      on(d.feed, d.records, d.health);
+    });
+  };
+  const visibility = () => {
+    clearTimeout(timer);
+    if (document.hidden) timer = window.setTimeout(() => { es?.close(); es = null; }, HIDDEN_CLOSE_MS);
+    else if (!es) { open(); resume(); }
+  };
+  open();
+  document.addEventListener("visibilitychange", visibility);
+  return () => { clearTimeout(timer); es?.close(); document.removeEventListener("visibilitychange", visibility); };
 }
 
 export type ExportReq = {
