@@ -8,7 +8,6 @@ import * as lucide from "lucide";
 import { alongTrack, FEED_ICON, feedColor, GLYPHS, inArea, inScope, MOVING_FEEDS, toFeatures, trackStep, type Area } from "./features";
 import { SEVERITY_RANK } from "./types";
 import { missionColor, SAT_3D_MAX_ZOOM, satelliteLayer } from "./orbits3d";
-import { INDIA_FIT } from "./sections";
 import type { FeedMeta, Rec } from "./types";
 
 const STYLE = "https://tiles.openfreemap.org/styles/dark";
@@ -19,11 +18,11 @@ export type Overlays = { highways: boolean; railways: boolean; rivers: boolean; 
 const fitPad = (panel: boolean) => ({ top: 118, bottom: 108, left: 24, right: panel ? 404 : 24 });
 let FIT_PAD = fitPad(true);
 const FONT = ["Noto Sans Regular"];
-// Home: all of India filling the map (raise HOME_ZOOM_OUT to pull back and show more of the globe).
-const HOME_ZOOM_OUT = 0;
+// Home: the maintainer's chosen view of India (centre and zoom as seen in a 746 px tall map), scaled to the window's height.
+const HOME = { center: [85.68, 21.08] as [number, number], zoom: 4.3, height: 746 };
+const homeZoom = (h: number) => HOME.zoom + Math.log2(Math.max(h, 300) / HOME.height);
 function home(m: maplibregl.Map, duration = 0) {
-  const cam = m.cameraForBounds(INDIA_FIT, { padding: FIT_PAD });
-  if (cam) m.easeTo({ center: cam.center, zoom: (cam.zoom ?? 4) - HOME_ZOOM_OUT, pitch: m.getPitch(), bearing: 0, duration });
+  m.easeTo({ center: HOME.center, zoom: homeZoom(m.getCanvas().clientHeight), pitch: m.getPitch(), bearing: 0, duration });
 }
 
 type Props = {
@@ -219,11 +218,26 @@ export function MapView(p: Props) {
   useEffect(() => {
     // a (re)created map starts empty: forget layers added to a previous instance (dev hot reload re-runs this effect)
     added.current = new Set(); ready.current = false;
-    const m = new maplibregl.Map({ container: el.current!, style: STYLE, bounds: INDIA_FIT, fitBoundsOptions: { padding: FIT_PAD },
+    const m = new maplibregl.Map({ container: el.current!, style: STYLE, center: HOME.center, zoom: homeZoom(el.current!.clientHeight),
       attributionControl: { compact: true }, maxPitch: 75 });
     map.current = m;
     m.dragRotate.disable(); m.touchZoomRotate.disableRotation();
     m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+    // reset view: back to the home camera (and out of a selected state)
+    m.addControl({
+      onAdd: () => {
+        const box = Object.assign(document.createElement("div"), { className: "maplibregl-ctrl maplibregl-ctrl-group" });
+        const btn = Object.assign(document.createElement("button"), { type: "button", title: "Reset view", className: "reset-view" });
+        btn.setAttribute("aria-label", "Reset view");
+        const icon = lucide.createElement(lucide.House);
+        icon.setAttribute("width", "16"); icon.setAttribute("height", "16");
+        btn.append(icon);
+        btn.onclick = () => { props.current.onState(null); home(m, 900); };
+        box.append(btn);
+        return box;
+      },
+      onRemove: () => {},
+    }, "bottom-right");
     m.addControl(new maplibregl.ScaleControl({}), "bottom-right");
     fetch("/geo/states.geojson").then((r) => r.json()).then((g) => {
       stateBox.current = Object.fromEntries(g.features.map((f: any) => [f.properties.name, f.properties.bbox]));
@@ -237,7 +251,6 @@ export function MapView(p: Props) {
     const hover = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: "320px" });
     let hoverState: string | number | undefined;
     m.on("load", () => {
-      home(m);
       m.setProjection({ type: "globe" });
       m.setSky({ "sky-color": "#05070d", "horizon-color": "#0b111f", "fog-color": "#05070d", "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] });
       for (const l of m.getStyle().layers) {

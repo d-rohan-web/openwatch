@@ -262,3 +262,4 @@ input:focus, select:focus { border-color: var(--accent); outline: none; }
   background: rgba(182, 156, 255, .08); border: 1px solid rgba(182, 156, 255, .25); font-size: 12px; }
 .sat-sum { padding: 6px 12px; font-size: 11px; border-bottom: 1px solid var(--border); }
 .tabs .tab { padding: 0 9px; }
+.maplibregl-ctrl-group .reset-view { display: grid; place-items: center; color: #333; }
