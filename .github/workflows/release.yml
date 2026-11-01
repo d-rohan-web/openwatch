@@ -19,6 +19,7 @@ jobs:
       matrix:
         include:
           - { name: api, context: ., file: apps/api/Dockerfile }
+          - { name: bff, context: ., file: apps/bff/Dockerfile }
           - { name: collector, context: ., file: apps/collector/Dockerfile }
           - { name: frontend, context: apps/frontend, file: apps/frontend/Dockerfile }
     steps:

@@ -77,7 +77,7 @@ Export is switched off by default. With `OPENWATCH_EXPORT_ENABLED=true` (self-ho
 
 From the UI: **Export** tab → pick feeds, a window and optionally the current map view → zip.
 
-From the API:
+From the API (self-hosters: the core API is private by default; set `OPENWATCH_PUBLIC_API=true` to serve it):
 
 ```bash
 curl -k -X POST https://localhost:39443/api/export -H 'content-type: application/json' \
@@ -93,14 +93,16 @@ source says it **happened** (`"observed"`). You can also query the archive direc
 SELECT * FROM read_parquet('records/feed=aircraft/date=2026-10-30/*.parquet') WHERE attrs->>'military' = 'true';
 ```
 
-API docs: `https://localhost:39443/api/docs`.
+API docs (with `OPENWATCH_PUBLIC_API=true`): `https://localhost:39443/api/docs`. The browser itself only uses the backend
+for frontend under `/ui` (see [docs/architecture.md](docs/architecture.md)).
 
 ## Layout
 
 ```
 apps/
   collector/        polls/streams every feed → archive + Redis live state   (feeds/: one file per source)
-  api/              FastAPI: live, SSE stream, history, records, export, raw, traffic tiles
+  api/              core FastAPI (private): live, SSE stream, history, records, export, raw, traffic tiles
+  bff/              backend for frontend: the only API the browser reaches (/ui/*)
   frontend/         React + MapLibre UI (static, served by nginx)
 packages/
   common/           archive (Parquet/DuckDB), JSON logging, config, geo helpers + data
@@ -127,7 +129,8 @@ uv sync                                   # Python 3.12
 docker run -d -p 36379:6379 redis:7-alpine
 REDIS_URL=redis://localhost:36379/0 uv run python -m apps.collector.main
 REDIS_URL=redis://localhost:36379/0 uv run uvicorn apps.api.main:app --port 8000
-cd apps/frontend && npm i && npm run dev  # http://localhost:5173
+OPENWATCH_API_URL=http://localhost:8000 uv run uvicorn apps.bff.main:app --port 8001   # what the browser talks to
+cd apps/frontend && npm i && npm run dev  # http://localhost:5173 (proxies /ui to :8001)
 uv run pytest -q && (cd apps/frontend && npm test)
 ```
 

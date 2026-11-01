@@ -12,7 +12,7 @@ L = {"type": "loki", "uid": "${loki}"}
 SEL = 'instance=~"$instance"'           # metric selector
 A = '{job="access", instance=~"$instance"}'  # access-log stream
 SEV = {"advisory": "#ffd23f", "warning": "#ff8c1a", "critical": "#ff4d4f", "info": "#5b9cff"}
-PAGES = r'uri !~ "^/(api|assets|geo)/.*"'
+PAGES = r'uri !~ "^/(api|ui|assets|geo)/.*"'
 
 
 def grid():
@@ -190,7 +190,7 @@ visitors = dashboard("openwatch-visitors", "OpenWatch · Visitors & traffic", "W
     (8, 9, pie("Devices", L, f'sum by (device) (count_over_time({A} | json uri="request.uri" | {PAGES} [$__range]))', "device")),
     (8, 9, series("Responses by status", L, [(f'sum by (status) (count_over_time({A} | json status="status" [5m]))', "{{status}}")], stack=True)),
     (12, 8, series("Bandwidth served / hour", L, [(f'sum(sum_over_time({A} | json size="size" | unwrap size [1h]))', "bytes")], unit="decbytes", bars=True)),
-    (12, 8, series("Response time p95 (excl. live stream)", L, [(f'quantile_over_time(0.95, {A} | json uri="request.uri", duration="duration" | uri !~ "/api/stream.*" | unwrap duration [5m]) by (instance)', "p95")], unit="s")),
+    (12, 8, series("Response time p95 (excl. live stream)", L, [(f'quantile_over_time(0.95, {A} | json uri="request.uri", duration="duration" | uri !~ "/(api|ui)/stream.*" | unwrap duration [5m]) by (instance)', "p95")], unit="s")),
     (24, 10, logs("Recent visitors", f'{A} | json uri="request.uri", status="status", ref="request.headers.Referer[0]" | {PAGES} | line_format "{{{{.country}}}} · {{{{.city}}}}   {{{{.browser}}}} / {{{{.os}}}} ({{{{.device}}}})   {{{{.status}}}} {{{{.uri}}}}   ← {{{{.ref}}}}"')),
 ])
 

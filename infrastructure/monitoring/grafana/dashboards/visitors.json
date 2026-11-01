@@ -123,7 +123,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "sum(count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [24h]))",
+     "expr": "sum(count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|ui|assets|geo)/.*\" [24h]))",
      "legendFormat": "",
      "refId": "A",
      "queryType": "instant"
@@ -402,7 +402,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "topk(10, sum by (uri) (count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range])))",
+     "expr": "topk(10, sum by (uri) (count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|ui|assets|geo)/.*\" [$__range])))",
      "legendFormat": "{{uri}}",
      "refId": "A"
     }
@@ -450,7 +450,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "sum by (lat, lon, city, country) (count_over_time({job=\"access\", instance=~\"$instance\"} | lat != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range]))",
+     "expr": "sum by (lat, lon, city, country) (count_over_time({job=\"access\", instance=~\"$instance\"} | lat != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|ui|assets|geo)/.*\" [$__range]))",
      "legendFormat": "",
      "refId": "A",
      "queryType": "instant"
@@ -549,7 +549,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "topk(12, sum by (country) (count_over_time({job=\"access\", instance=~\"$instance\"} | country != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range])))",
+     "expr": "topk(12, sum by (country) (count_over_time({job=\"access\", instance=~\"$instance\"} | country != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|ui|assets|geo)/.*\" [$__range])))",
      "legendFormat": "{{country}}",
      "refId": "A"
     }
@@ -597,7 +597,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "topk(10, sum by (city) (count_over_time({job=\"access\", instance=~\"$instance\"} | city != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range])))",
+     "expr": "topk(10, sum by (city) (count_over_time({job=\"access\", instance=~\"$instance\"} | city != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|ui|assets|geo)/.*\" [$__range])))",
      "legendFormat": "{{city}}",
      "refId": "A"
     }
@@ -645,7 +645,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "sum by (browser) (count_over_time({job=\"access\", instance=~\"$instance\"} | browser != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range]))",
+     "expr": "sum by (browser) (count_over_time({job=\"access\", instance=~\"$instance\"} | browser != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|ui|assets|geo)/.*\" [$__range]))",
      "legendFormat": "{{browser}}",
      "refId": "A"
     }
@@ -692,7 +692,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "sum by (os) (count_over_time({job=\"access\", instance=~\"$instance\"} | os != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range]))",
+     "expr": "sum by (os) (count_over_time({job=\"access\", instance=~\"$instance\"} | os != \"\" | json uri=\"request.uri\" | uri !~ \"^/(api|ui|assets|geo)/.*\" [$__range]))",
      "legendFormat": "{{os}}",
      "refId": "A"
     }
@@ -739,7 +739,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "sum by (device) (count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|assets|geo)/.*\" [$__range]))",
+     "expr": "sum by (device) (count_over_time({job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\" | uri !~ \"^/(api|ui|assets|geo)/.*\" [$__range]))",
      "legendFormat": "{{device}}",
      "refId": "A"
     }
@@ -893,7 +893,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "quantile_over_time(0.95, {job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\", duration=\"duration\" | uri !~ \"/api/stream.*\" | unwrap duration [5m]) by (instance)",
+     "expr": "quantile_over_time(0.95, {job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\", duration=\"duration\" | uri !~ \"/(api|ui)/stream.*\" | unwrap duration [5m]) by (instance)",
      "legendFormat": "p95",
      "refId": "A"
     }
@@ -945,7 +945,7 @@
       "type": "loki",
       "uid": "${loki}"
      },
-     "expr": "{job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\", status=\"status\", ref=\"request.headers.Referer[0]\" | uri !~ \"^/(api|assets|geo)/.*\" | line_format \"{{.country}} · {{.city}}   {{.browser}} / {{.os}} ({{.device}})   {{.status}} {{.uri}}   ← {{.ref}}\"",
+     "expr": "{job=\"access\", instance=~\"$instance\"} | json uri=\"request.uri\", status=\"status\", ref=\"request.headers.Referer[0]\" | uri !~ \"^/(api|ui|assets|geo)/.*\" | line_format \"{{.country}} · {{.city}}   {{.browser}} / {{.os}} ({{.device}})   {{.status}} {{.uri}}   ← {{.ref}}\"",
      "legendFormat": "",
      "refId": "A"
     }

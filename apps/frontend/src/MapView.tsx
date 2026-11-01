@@ -4,7 +4,8 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
-import * as lucide from "lucide";
+import { createElement, House } from "lucide";
+import { ICONS } from "./icons";
 import { alongTrack, FEED_ICON, feedColor, GLYPHS, inArea, inScope, MOVING_FEEDS, toFeatures, trackStep, type Area } from "./features";
 import { SEVERITY_RANK } from "./types";
 import { missionColor, SAT_3D_MAX_ZOOM, satelliteLayer } from "./orbits3d";
@@ -78,10 +79,9 @@ const ship = icon((g) => {
 
 // Render a lucide icon (white strokes) into an SDF sprite image so each point can be tinted by its colour.
 async function glyphImage(name: string): Promise<ImageData | null> {
-  const key = name.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());
-  const icon = (lucide as any)[key] as [string, object, [string, Record<string, string>][]] | undefined;  // ["svg", attrs, children]
+  const icon = ICONS[name];  // ["svg", attrs, children]
   if (!icon) return null;
-  const body = icon[2].map(([tag, attrs]) => `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+  const body = (icon[2] ?? []).map(([tag, attrs]) => `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="-2 -2 28 28" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
   const img = new Image();
   img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
@@ -232,7 +232,7 @@ export function MapView(p: Props) {
         const box = Object.assign(document.createElement("div"), { className: "maplibregl-ctrl maplibregl-ctrl-group" });
         const btn = Object.assign(document.createElement("button"), { type: "button", title: "Reset view", className: "reset-view" });
         btn.setAttribute("aria-label", "Reset view");
-        const icon = lucide.createElement(lucide.House);
+        const icon = createElement(House);
         icon.setAttribute("width", "16"); icon.setAttribute("height", "16");
         btn.append(icon);
         btn.onclick = () => { props.current.onState(null); home(m, 900); };
@@ -292,7 +292,7 @@ export function MapView(p: Props) {
         filter: ["==", ["get", "class"], "river"], layout: { visibility: "none", "symbol-placement": "line",
           "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": FONT, "text-size": 10, "symbol-spacing": 350 },
         paint: { "text-color": "#7dd3fc", "text-halo-color": "#02030a", "text-halo-width": 1.3 } });
-      m.addSource("traffic", { type: "raster", tiles: ["/api/tiles/traffic/{z}/{x}/{y}.png"], tileSize: 256, attribution: "Traffic © TomTom" });
+      m.addSource("traffic", { type: "raster", tiles: ["/ui/tiles/traffic/{z}/{x}/{y}.png"], tileSize: 256, attribution: "Traffic © TomTom" });
       m.addLayer({ id: "traffic", type: "raster", source: "traffic", layout: { visibility: "none" }, paint: { "raster-opacity": 0.75 } });
       // Day: NASA Blue Marble imagery (public domain, GIBS) under roads and labels; Night: the dark vector basemap alone
       m.addSource("bluemarble", { type: "raster", tileSize: 256, maxzoom: 8, attribution: "Imagery: NASA Blue Marble (GIBS)",

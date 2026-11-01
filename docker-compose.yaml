@@ -25,7 +25,7 @@ services:
   caddy:
     image: caddy:2.10-alpine
     depends_on:
-      api: { condition: service_started }
+      bff: { condition: service_started }
       frontend: { condition: service_started }
     ports:
       - "${OPENWATCH_HTTPS_PORT:-39443}:443"
@@ -33,6 +33,7 @@ services:
       - "${OPENWATCH_HTTP_PORT:-39080}:80"
     environment:
       OPENWATCH_SITE: ${OPENWATCH_SITE:-localhost}   # public name → automatic Let's Encrypt; localhost → internal CA
+      OPENWATCH_PUBLIC_API: ${OPENWATCH_PUBLIC_API:-false}   # true: also serve the core API (/api/*, /api/docs) publicly
     volumes:
       - ./infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data                           # certificates: keep across restarts (Let's Encrypt rate limits)
@@ -47,6 +48,21 @@ services:
     logging: *logging
 
   # ---------------------------------------------------------- app
+  bff:   # backend for frontend: the only API the browser reaches (/ui/*); calls api over this network
+    image: ghcr.io/d-rohan-web/openwatch-bff:${OPENWATCH_TAG:-latest}
+    build: { context: ., dockerfile: apps/bff/Dockerfile }
+    environment:
+      OPENWATCH_API_URL: http://api:8000
+    depends_on:
+      api: { condition: service_started }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ui/health')"]
+      interval: 30s
+      timeout: 5s
+    mem_limit: 128m
+    restart: unless-stopped
+    logging: *logging
+
   api:
     image: ghcr.io/d-rohan-web/openwatch-api:${OPENWATCH_TAG:-latest}
     build: { context: ., dockerfile: apps/api/Dockerfile }
