@@ -5,8 +5,9 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
 import * as lucide from "lucide";
-import { alongTrack, FEED_ICON, feedColor, GLYPHS, inArea, inScope, MOVING_FEEDS, toFeatures, trackStep, type Area } from "./features";
+import { alongTrack, color, FEED_ICON, feedColor, GLYPHS, inArea, inScope, MOVING_FEEDS, toFeatures, trackStep, type Area } from "./features";
 import { SEVERITY_RANK } from "./types";
+import { SAT_3D_MAX_ZOOM, satelliteLayer } from "./orbits3d";
 import { INDIA_FIT } from "./sections";
 import type { FeedMeta, Rec } from "./types";
 
@@ -121,7 +122,7 @@ function addFeedLayers(map: maplibregl.Map, id: string, color: string) {
   // a coloured dot when zoomed out; from zoom 5 a dark badge with a coloured ring and the kind's glyph inside
   map.addLayer({ id: `${id}-circle`, type: "circle", source: src, filter: ["all", isPoint, NOT_CLUSTER, ["!", ["get", "arrow"]]],
     paint: { "circle-color": ["step", ["zoom"], ["get", "color"], bz, ["case", HAS_GLYPH, "#0a0f1c", ["get", "color"]]],
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 4, bz, ["case", HAS_GLYPH, 11, 4.5], 9, ["case", HAS_GLYPH, 16, 7.5]],
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], ...(bz > 2 ? [2, 4] : []), bz, ["case", HAS_GLYPH, 11, 4.5], 9, ["case", HAS_GLYPH, 16, 7.5]],
       "circle-stroke-color": ["step", ["zoom"], "#05070d", bz, ["case", HAS_GLYPH, ["get", "color"], "#05070d"]],
       "circle-stroke-width": ["step", ["zoom"], 0.8, bz, ["case", HAS_GLYPH, 1.4, 0.8]],
       // minor items (small airstrips, heliports) only once zoomed in
@@ -130,6 +131,8 @@ function addFeedLayers(map: maplibregl.Map, id: string, color: string) {
     layout: { "icon-image": ["get", "glyph"], "icon-allow-overlap": true, "icon-ignore-placement": true,
       "icon-size": ["interpolate", ["linear"], ["zoom"], bz, 0.42, 9, 0.6] },
     paint: { "icon-color": ["get", "color"], "icon-opacity": ["case", ["get", "past"], 0.45, 1] } });
+  // satellites: the 3D layer (orbits3d.ts) draws them in the air when zoomed out; ground markers only past it
+  if (id === "satellites") for (const l of ["line", "glow", "circle", "glyph"]) map.setLayerZoomRange(`${id}-${l}`, SAT_3D_MAX_ZOOM, 24);
   const isCluster = ["has", "point_count"] as any;
   const sevColor = ["match", ["get", "sev"], 3, "#ff4d4f", 2, "#ff8c1a", 1, "#ffd23f", color] as any;
   map.addLayer({ id: `${id}-cluster`, type: "circle", source: src, filter: isCluster,
@@ -144,7 +147,7 @@ function addFeedLayers(map: maplibregl.Map, id: string, color: string) {
   map.addLayer({ id: `${id}-icon`, type: "symbol", source: src, filter: ["all", isPoint, ["get", "arrow"]],
     layout: { "icon-image": ["get", "icon"], "icon-rotate": ["get", "rot"], "icon-rotation-alignment": "map",
       "icon-pitch-alignment": "map", "icon-allow-overlap": true, "icon-ignore-placement": true,
-      "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 6, 0.92, 10, 1.3] },
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 3, 0.85, 6, 1.1, 10, 1.5] },
     paint: { "icon-color": ["get", "color"], "icon-halo-color": "#02040a", "icon-halo-width": 1.2 } });
 }
 
@@ -219,6 +222,12 @@ export function MapView(p: Props) {
     fetch("/geo/states.geojson").then((r) => r.json()).then((g) => {
       stateBox.current = Object.fromEntries(g.features.map((f: any) => [f.properties.name, f.properties.bbox]));
     }).catch(() => {});
+    // satellites floating at (compressed) altitude above their ground point; the selected one's orbit in 3D
+    const satLayer = satelliteLayer(() => {
+      const c = props.current;
+      return { sats: c.on.has("satellites") ? c.live.satellites ?? [] : [], color: (r) => color(r, "space"),
+        selected: c.selected?.feed === "satellites" ? c.selected.id : undefined, allOrbits: c.overlays.orbits };
+    });
     const hover = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: "320px" });
     let hoverState: string | number | undefined;
     m.on("load", () => {
@@ -347,6 +356,7 @@ export function MapView(p: Props) {
       m.addLayer({ id: "pass-label", type: "symbol", source: "pass", filter: ["match", ["get", "part"], ["edge", "now"], true, false],
         layout: { "text-field": ["get", "label"], "text-font": FONT, "text-size": 12, "text-offset": [0, 1.4], "text-anchor": "top", "text-allow-overlap": true },
         paint: { "text-color": ["match", ["get", "part"], "edge", "#ffb366", "#ffffff"], "text-halo-color": "#02030a", "text-halo-width": 1.8 } });
+      m.addLayer(satLayer);
       m.addSource("history", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       m.addLayer({ id: "history", type: "line", source: "history", paint: { "line-color": "#ffffff", "line-width": 2, "line-opacity": 0.75, "line-dasharray": [1, 1.5] } });
       m.addSource("sel", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
@@ -359,6 +369,8 @@ export function MapView(p: Props) {
     });
     const recordLayers = () => [...added.current].flatMap((f) => ["cluster", "circle", "icon", "fill", "line"].map((l) => `${f}-${l}`)).filter((i) => m.getLayer(i));
     m.on("click", (e) => {
+      const sat = satLayer.pick(e.point.x, e.point.y);
+      if (sat) return props.current.select("satellites", sat);
       const f = m.queryRenderedFeatures(e.point, { layers: recordLayers() })[0];
       if (f && f.layer.id.endsWith("-cluster")) {
         const src = m.getSource(f.source) as maplibregl.GeoJSONSource;
@@ -450,7 +462,7 @@ export function MapView(p: Props) {
     }
     m.setLayoutProperty("traffic", "visibility", p.traffic ? "visible" : "none");
     shadeDistricts(m);
-    for (const id of ["history", "sel"]) m.moveLayer(id);
+    for (const id of ["history", "sel", "sat-3d"]) m.moveLayer(id);
   }), [p.live, p.on, p.feeds, p.traffic, p.area, p.selected, p.overlays.orbits]);
 
   // glide moving things between reports (aircraft, ships): re-project once a second
