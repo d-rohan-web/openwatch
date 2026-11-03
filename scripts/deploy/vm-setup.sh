@@ -24,7 +24,9 @@ set_env OPENWATCH_HTTPS_PORT 443
 set_env OPENWATCH_HTTP_PORT 80
 
 docker compose pull
-docker compose up -d --no-build --remove-orphans
+# --force-recreate on boot/rerun: if the network definition changed, every container must move to the new
+# network together (otherwise some keep the old one and can't resolve each other)
+docker compose up -d --no-build --remove-orphans --force-recreate
 # Caddy reads its config at start: reload gracefully so Caddyfile changes from git apply without downtime
 docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile || true
 

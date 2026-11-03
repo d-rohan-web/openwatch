@@ -114,8 +114,11 @@ def dashboard(uid, title, desc, panels_with_size, refresh="1m", time_from="now-2
         p.update(id=i + 1, gridPos=at(w, h))
         panels.append(p)
     variables = [
-        {"name": "prom", "label": "Metrics", "type": "datasource", "query": "prometheus", "hide": 0},
-        {"name": "loki", "label": "Logs", "type": "datasource", "query": "loki", "hide": 0},
+        # skip Grafana Cloud's internal sources (alert-state history, usage insights, ...) that share these types
+        {"name": "prom", "label": "Metrics", "type": "datasource", "query": "prometheus", "hide": 0,
+         "regex": "/^(?!.*(usage|alert-state|ml-metrics|insights)).*$/"},
+        {"name": "loki", "label": "Logs", "type": "datasource", "query": "loki", "hide": 0,
+         "regex": "/^(?!.*(alert-state|usage|insights)).*$/"},
         {"name": "instance", "label": "Site", "type": "query", "datasource": P, "refresh": 2, "includeAll": True,
          "allValue": ".*", "current": {"text": "All", "value": "$__all"},
          "query": {"query": "label_values(openwatch_live_records, instance)", "refId": "v"}, "definition": "label_values(openwatch_live_records, instance)"},

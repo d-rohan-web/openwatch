@@ -19,14 +19,16 @@
     "label": "Metrics",
     "type": "datasource",
     "query": "prometheus",
-    "hide": 0
+    "hide": 0,
+    "regex": "/^(?!.*(usage|alert-state|ml-metrics|insights)).*$/"
    },
    {
     "name": "loki",
     "label": "Logs",
     "type": "datasource",
     "query": "loki",
-    "hide": 0
+    "hide": 0,
+    "regex": "/^(?!.*(alert-state|usage|insights)).*$/"
    },
    {
     "name": "instance",
