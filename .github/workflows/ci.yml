@@ -17,7 +17,7 @@ jobs:
     name: Backend tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
       - run: uv sync --frozen
@@ -29,7 +29,7 @@ jobs:
     defaults:
       run: { working-directory: apps/frontend }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: 24, cache: npm, cache-dependency-path: apps/frontend/package-lock.json }
       - run: npm ci
@@ -41,7 +41,7 @@ jobs:
     name: Docker images build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: cp .env.example .env && docker compose config -q
       - run: docker compose build
 
@@ -49,7 +49,7 @@ jobs:
     name: No secrets committed
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - uses: gitleaks/gitleaks-action@v3
         env:
